@@ -1,4 +1,4 @@
-/* 
+/*
  * Authors: Bernardo Barzotto Zomer (21103639)
  *          Lucas Marchesan Cunha   (21101060)
  *          Pedro da Cunha Gaspary  (21101429)
@@ -20,38 +20,38 @@ uint8_t clock[] = {0b00011100,
                    0b00101010,
                    0b00011100};
 
-uint8_t flag[] = { 0b00000000,
-                   0b11111111,
-                   0b00011111,
-                   0b00001110,
-                   0b00000100};
+uint8_t flag[] = {0b00000000,
+                  0b11111111,
+                  0b00011111,
+                  0b00001110,
+                  0b00000100};
 
-uint8_t mine[] = { 0b00101010,
-                    0b0011100,
-                    0b0111110,
-                    0b0011100,
-                    0b0101010};
+uint8_t mine[] = {0b00101010,
+                  0b0011100,
+                  0b0111110,
+                  0b0011100,
+                  0b0101010};
 
-uint8_t space[] = { 0b0000000,
-                    0b0011100,
-                    0b0011100,
-                    0b0011100,
-                    0b0000000};
-                             
-uint8_t selected_space[] = { 0b0111110,
-                             0b0111110,
-                             0b0111110,
-                             0b0111110,
-                             0b0111110};                             
-                    
+uint8_t space[] = {0b0000000,
+                   0b0011100,
+                   0b0011100,
+                   0b0011100,
+                   0b0000000};
+
+uint8_t selected_space[] = {0b0111110,
+                            0b0111110,
+                            0b0111110,
+                            0b0111110,
+                            0b0111110};
+
 int start = 0;
 int reset = 0;
 
-int minu, seg=0;
+int minu, seg = 0;
+char field[5][14];
 
 TIMER_CLK = F_CPU / 1024;
-IRQ_FREQ = 100;
-
+IRQ_FREQ = 1;
 
 // Botao de cima
 // Inicia ou pausa o cronometro
@@ -79,8 +79,10 @@ ISR(INT1_vect)
     _delay_ms(1);
 }
 
-ISR(TIMER1_COMPA_vect){
-    if (start == 1) {
+ISR(TIMER1_COMPA_vect)
+{
+    if (start == 1)
+    {
         seg++;
         if (seg >= 60)
         {
@@ -94,6 +96,7 @@ ISR(TIMER1_COMPA_vect){
 void print_crono(char *min, char *sec, char *crono)
 {
     // Printa no modelo XX:XX
+    strcat(crono, "\001");
     sprintf(min, "%d", minu);
     sprintf(sec, "%d", seg);
     if (minu < 10)
@@ -104,29 +107,69 @@ void print_crono(char *min, char *sec, char *crono)
         strcat(crono, "0");
     strcat(crono, sec);
 
-    //Alterar
-    nokia_lcd_set_cursor(7, 23);
-    nokia_lcd_write_string(crono, 2);
-    nokia_lcd_set_cursor(65, 32);
+    nokia_lcd_set_cursor(0, 40);
+    nokia_lcd_write_string(crono, 1);
     crono[0] = '\0';
     nokia_lcd_render();
 }
 
+//Metodo que imprime as bandeiras usadas pelo jogador
+void print_flags(int num_flags) {
+    char flags[6];
+    sprintf(flags,"%d",num_flags);
+    strcat(flags, "/14");
+    strcat(flags,"\004");
+
+    nokia_lcd_set_cursor(54,40);
+    nokia_lcd_write_string(flags, 1);
+    nokia_lcd_render();
+}
+
+// Metodo que imprime a matriz no display
+void print_field()
+{
+    for (int i = 0; i < 5; i++)
+    {
+        nokia_lcd_set_cursor(0, i * 8);
+        for (int j = 0; j < 14; j++)
+        {
+            switch (field[i][j])
+            {
+            case 'a':
+                nokia_lcd_write_string("\001", 1);
+                break; // clock
+            case 'b':
+                nokia_lcd_write_string("\002", 1);
+                break; // blank_space
+            case 'c':
+                nokia_lcd_write_string("\003", 1);
+                break; // selected_space
+            case 'd':
+                nokia_lcd_write_string("\004", 1);
+                break; // flag
+            case 'e':
+                nokia_lcd_write_string("\005", 1);
+                break; // mine
+            }
+        }
+    }
+}
+
 int main(void)
 {
-	cli();
+    cli();
     // TIMER1
-	TCCR1A = 0;
-	TCCR1B = 0;
-	TCNT1  = 0;
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1 = 0;
 
-	OCR1A = (TIMER_CLK / IRQ_FREQ) - 1;
-	TCCR1B |= (1 << WGM12);
-	TCCR1B |= (1 << CS12) | (1 << CS10);  
-	TIMSK1 |= (1 << OCIE1A);
-	DDRD |= (1 << PD5);
+    OCR1A = (TIMER_CLK / IRQ_FREQ) - 1;
+    TCCR1B |= (1 << WGM12);
+    TCCR1B |= (1 << CS12) | (1 << CS10);
+    TIMSK1 |= (1 << OCIE1A);
+    DDRD |= (1 << PD5);
 
-    // botoes para iniciar/parar e resetar    
+    // botoes para iniciar/parar e resetar
     DDRD &= ~((1 << PD2) | (1 << PD3));
     PORTD = ((1 << PD2) | (1 << PD3));
 
@@ -136,25 +179,25 @@ int main(void)
     sei();
 
     nokia_lcd_init();
-    nokia_lcd_custom(1, clock);
-    nokia_lcd_custom(2, space);
-    nokia_lcd_custom(3, selected_space);
-    nokia_lcd_custom(4, flag);
-    nokia_lcd_custom(5, mine);
+    nokia_lcd_custom(1, clock);          // Cod: a
+    nokia_lcd_custom(2, space);          // Cod: b
+    nokia_lcd_custom(3, selected_space); // Cod: c
+    nokia_lcd_custom(4, flag);           // Cod: d
+    nokia_lcd_custom(5, mine);           // Cod: e
     char min[4], sec[3], crono[6];
+    int num_flags = 0;
 
-    nokia_lcd_write_string("\002\002\005\002\005\002\002\002\005\002\005\002\002\002", 1);
-    nokia_lcd_set_cursor(0,8);
-    nokia_lcd_write_string("\005\002\0022\002\005\002\002222\005\003\002", 1);
-    nokia_lcd_set_cursor(0,16);
-    nokia_lcd_write_string("\0052\002\002\002\0024\0052 13\002\002", 1);
-    nokia_lcd_set_cursor(0,24);
-    nokia_lcd_write_string("\002\002\002\0021\002\005\00531 1\005\002", 1);
-    nokia_lcd_set_cursor(0,32);
-    nokia_lcd_write_string("\002\002\002\002\002\005\002\002\0051 1\002\002", 1);
-    nokia_lcd_set_cursor(0,40);
-    nokia_lcd_write_string("\00107:30   08/15", 1);
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 14; j++)
+        {
+            field[i][j] = 'b';
+        }
+    }
+
+    print_field();
+    print_crono(min, sec, crono);
+    print_flags(num_flags);
     nokia_lcd_render();
     _delay_ms(1);
-    
 }
