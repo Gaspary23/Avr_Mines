@@ -7,6 +7,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -53,59 +54,79 @@ uint8_t selected_space[] = {
 	0b0111110
 };
 
-int start = 0;
-int minu, seg = 0;
+int start = 1;
+int min, sec = 0;
 char field[5][14];
 
-TIMER_CLK = F_CPU / 1024;
+#define TIMER_CLK	F_CPU / 1024
 // Update the timer once per second.
-TIMER_FREQ = 1;
+#define TIMER_FREQ  1
 
 void print_start();
+void print_timer();
 
-ISR(INT0_vect)
+int main(void)
 {
-    if (start == 1)
+	cli();
+
+	// Set up the timer.
+	TCCR1A = 0;
+	TCCR1B = 0;
+	TCNT1  = 0;
+	OCR1A = (TIMER_CLK / TIMER_FREQ) - 1;
+	TCCR1B |= (1 << WGM12);
+	TCCR1B |= (1 << CS12) | (1 << CS10);
+	TIMSK1 |= (1 << OCIE1A);
+	DDRD |= (1 << PD5);
+
+	sei();
+
+    nokia_lcd_init();
+    nokia_lcd_custom(1, clock);          // Cod: a
+    nokia_lcd_custom(2, space);          // Cod: b
+    nokia_lcd_custom(3, selected_space); // Cod: c
+    nokia_lcd_custom(4, flag);           // Cod: d
+    nokia_lcd_custom(5, mine);           // Cod: e
+    int num_flags = 0;
+
+    for (int i = 0; i < 5; i++)
     {
-        seg++;
-        if (seg >= 60)
+        for (int j = 0; j < 14; j++)
         {
-            seg = 0;
-            minu++;
+            field[i][j] = 'b';
+        }
+    }
+
+	while (1) {
+		print_field();
+		print_timer();
+		print_flags(num_flags);
+		nokia_lcd_render();
+	}
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    if (start) {
+        sec++;
+
+        if (sec >= 60) {
+            sec = 0;
+            min++;
         }
     }
 }
 
-ISR(INT1_vect){
-	if (start == 1) {
-		seg++;
-		if (seg >= 60)
-		{
-			seg = 0;
-			minu++;
-		}
-	}
-}
-
-// Metodo que imprime o relogio na tela
-void print_crono(char *min, char *sec, char *crono)
+/**
+ * Prints the timer in MM:SS format to the screen.
+ */
+void print_timer()
 {
-    // Printa no modelo XX:XX
-    strcat(crono, "\001");
-    sprintf(min, "%d", minu);
-    sprintf(sec, "%d", seg);
-    if (minu < 10)
-        strcat(crono, "0");
-    strcat(crono, min);
-    strcat(crono, ":");
-    if (seg < 10)
-        strcat(crono, "0");
-    strcat(crono, sec);
-
-    nokia_lcd_set_cursor(0, 40);
-    nokia_lcd_write_string(crono, 1);
-    crono[0] = '\0';
-    nokia_lcd_render();
+	char time_display[7];
+	sprintf(time_display, "\001%02d:%02d", min, sec);
+	nokia_lcd_set_cursor(0, 40);
+	nokia_lcd_write_string(time_display, 1);
+	nokia_lcd_render();
 }
 
 //Metodo que imprime as bandeiras usadas pelo jogador
@@ -148,55 +169,6 @@ void print_field()
             }
         }
     }
-}
-
-int main(void)
-{
-	cli();
-
-	// TIMER1
-	TCCR1A = 0;
-	TCCR1B = 0;
-	TCNT1  = 0;
-
-	OCR1A = (TIMER_CLK / TIMER_FREQ) - 1;
-	TCCR1B |= (1 << WGM12);
-	TCCR1B |= (1 << CS12) | (1 << CS10);
-	TIMSK1 |= (1 << OCIE1A);
-	DDRD |= (1 << PD5);
-
-	// botoes para iniciar/parar e resetar
-	DDRD &= ~((1 << PD2) | (1 << PD3));
-	PORTD = ((1 << PD2) | (1 << PD3));
-
-	EICRA = ((1 << ISC01) | (1 << ISC00));
-	EICRA |= ((1 << ISC11) | (1 << ISC10));
-	EIMSK |= ((1 << INT1) | (1 << INT0));
-
-	sei();
-
-    nokia_lcd_init();
-    nokia_lcd_custom(1, clock);          // Cod: a
-    nokia_lcd_custom(2, space);          // Cod: b
-    nokia_lcd_custom(3, selected_space); // Cod: c
-    nokia_lcd_custom(4, flag);           // Cod: d
-    nokia_lcd_custom(5, mine);           // Cod: e
-    char min[4], sec[3], crono[6];
-    int num_flags = 0;
-
-    for (int i = 0; i < 5; i++)
-    {
-        for (int j = 0; j < 14; j++)
-        {
-            field[i][j] = 'b';
-        }
-    }
-
-    print_field();
-    print_crono(min, sec, crono);
-    print_flags(num_flags);
-    nokia_lcd_render();
-    _delay_ms(1);
 }
 
 void print_start() {
