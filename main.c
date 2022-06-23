@@ -12,47 +12,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "chars.h"
 #include "nokia5110.h"
-
-uint8_t clock[] = {
-	0b00011100,
-	0b00100010,
-	0b01001111,
-	0b00101010,
-	0b00011100
-};
-
-uint8_t flag[] = {
-	0b00000000,
-	0b11111111,
-	0b00011111,
-	0b00001110,
-	0b00000100
-};
-
-uint8_t mine[] = {
-	0b00101010,
-	0b0011100,
-	0b0111110,
-	0b0011100,
-	0b0101010
-};
-
-uint8_t space[] = {
-	0b0000000,
-	0b0011100,
-	0b0011100,
-	0b0011100,
-	0b0000000
-};
-
-uint8_t selected[] = {
-	0b0111110,
-	0b0111110,
-	0b0111110,
-	0b0111110,
-	0b0111110
-};
 
 int start = 1;
 int min, sec = 0;
@@ -96,11 +57,11 @@ int main(void)
 	sei();
 
     nokia_lcd_init();
-    nokia_lcd_custom(1, clock);
-    nokia_lcd_custom(2, space);
-    nokia_lcd_custom(3, selected);
-    nokia_lcd_custom(4, flag);
-    nokia_lcd_custom(5, mine);
+    nokia_lcd_custom(1, CLOCK);
+    nokia_lcd_custom(2, SPACE);
+    nokia_lcd_custom(3, SELECTED);
+    nokia_lcd_custom(4, FLAG);
+    nokia_lcd_custom(5, MINE);
     int num_flags = 0;
 
     for (int i = 0; i < 5; i++) {
