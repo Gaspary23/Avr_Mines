@@ -26,6 +26,8 @@ char field[5][14];
 #define FIELD_WIDTH		14
 #define FIELD_HEIGHT	05
 #define MINE_AMOUNT		14
+#define CHECK			PIND & (1 << PD7)
+#define FLAG			PIND & (1 << PD6)
 
 enum Tile {
 	Clock = 'a',
@@ -52,7 +54,11 @@ int main(void)
 	TCCR1B |= (1 << WGM12);
 	TCCR1B |= (1 << CS12) | (1 << CS10);
 	TIMSK1 |= (1 << OCIE1A);
-	DDRD |= (1 << PD5);
+
+	// Toggle interruption vector for PD7, ..., PD0.
+    PCICR |= (1 << PCIE2);
+	// Toggle interruptions for PD6 and PD7.
+    PCMSK2 |= (1 << PCINT6) | (1 << PCINT7);
 
 	sei();
 
@@ -145,6 +151,9 @@ void write_start() {
 	);
 }
 
+/**
+ * Increment the timer.
+ */
 ISR(TIMER1_COMPA_vect)
 {
     if (start) {
@@ -158,4 +167,21 @@ ISR(TIMER1_COMPA_vect)
 		sec = 0;
 		min = 0;
 	}
+}
+
+/**
+ * Handle button interruptions.
+ */
+ISR(PCINT2_vect)
+{
+	if (CHECK) {
+		// DEBUG: Toggle timer.
+		start ^= 0;
+
+		while (CHECK) {
+			_delay_ms(1);
+		}
+	}
+
+	_delay_ms(1);
 }
