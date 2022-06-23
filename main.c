@@ -46,7 +46,7 @@ uint8_t space[] = {
 	0b0000000
 };
 
-uint8_t selected_space[] = {
+uint8_t selected[] = {
 	0b0111110,
 	0b0111110,
 	0b0111110,
@@ -58,12 +58,26 @@ int start = 1;
 int min, sec = 0;
 char field[5][14];
 
-#define TIMER_CLK	F_CPU / 1024
+#define TIMER_CLK		F_CPU / 1024
 // Update the timer once per second.
-#define TIMER_FREQ  1
+#define TIMER_FREQ		01
+// Specify the minefield's dimensions in lines and columns.
+#define FIELD_WIDTH		14
+#define FIELD_HEIGHT	05
+#define MINE_AMOUNT		14
 
-void print_start();
-void print_timer();
+enum Tile {
+	Clock = 'a',
+	Blank = 'b',
+	Selected = 'c',
+	Flag = 'd',
+	Mine = 'e',
+};
+
+void write_start();
+void write_timer(uint8_t x, uint8_t y);
+void write_flag_count(int num_flags, uint8_t x, uint8_t y);
+void write_field();
 
 int main(void)
 {
@@ -82,27 +96,93 @@ int main(void)
 	sei();
 
     nokia_lcd_init();
-    nokia_lcd_custom(1, clock);          // Cod: a
-    nokia_lcd_custom(2, space);          // Cod: b
-    nokia_lcd_custom(3, selected_space); // Cod: c
-    nokia_lcd_custom(4, flag);           // Cod: d
-    nokia_lcd_custom(5, mine);           // Cod: e
+    nokia_lcd_custom(1, clock);
+    nokia_lcd_custom(2, space);
+    nokia_lcd_custom(3, selected);
+    nokia_lcd_custom(4, flag);
+    nokia_lcd_custom(5, mine);
     int num_flags = 0;
 
-    for (int i = 0; i < 5; i++)
-    {
-        for (int j = 0; j < 14; j++)
-        {
-            field[i][j] = 'b';
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 14; j++) {
+            field[i][j] = Blank;
         }
     }
 
 	while (1) {
-		print_field();
-		print_timer();
-		print_flags(num_flags);
+		write_field();
+		write_timer(0, FIELD_HEIGHT * 8);
+		write_flag_count(num_flags, FIELD_WIDTH * 5 - 16, FIELD_HEIGHT * 8);
 		nokia_lcd_render();
 	}
+}
+
+/**
+ * Write the timer in MM:SS format to the screen.
+ */
+void write_timer(uint8_t x, uint8_t y)
+{
+	char time_display[7];
+	sprintf(time_display, "\001%02d:%02d", min, sec);
+	nokia_lcd_set_cursor(x, y);
+	nokia_lcd_write_string(time_display, 1);
+}
+
+/**
+ * Write the amount of flags used by the player to the screen.
+ */
+void write_flag_count(int num_flags, uint8_t x, uint8_t y)
+{
+    char flags[6];
+    sprintf(flags, "%d/%d\004", num_flags, MINE_AMOUNT);
+    nokia_lcd_set_cursor(x, y);
+    nokia_lcd_write_string(flags, 1);
+}
+
+/**
+ * Write the minefield matrix to the screen.
+ */
+void write_field()
+{
+    for (int i = 0; i < FIELD_HEIGHT; i++) {
+        nokia_lcd_set_cursor(0, i * 8);
+
+        for (int j = 0; j < FIELD_WIDTH; j++) {
+            switch (field[i][j]) {
+				case Clock:
+					nokia_lcd_write_string("\001", 1);
+					break;
+				case Blank:
+					nokia_lcd_write_string("\002", 1);
+					break;
+				case Selected:
+					nokia_lcd_write_string("\003", 1);
+					break;
+				case Flag:
+					nokia_lcd_write_string("\004", 1);
+					break;
+				case Mine:
+					nokia_lcd_write_string("\005", 1);
+					break;
+            }
+        }
+    }
+}
+
+
+/**
+ * Write the start menu to the screen.
+ */
+void write_start() {
+	nokia_lcd_write_string(
+		" AVR \005 Mines! "
+		"              "
+		" \0041\002\00232   11\002 "
+		" 1 2\005\002\0021 1\002\002\002 "
+		"              "
+		" Press CHECK! ",
+		1
+	);
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -114,72 +194,8 @@ ISR(TIMER1_COMPA_vect)
             sec = 0;
             min++;
         }
-    }
-}
-
-/**
- * Prints the timer in MM:SS format to the screen.
- */
-void print_timer()
-{
-	char time_display[7];
-	sprintf(time_display, "\001%02d:%02d", min, sec);
-	nokia_lcd_set_cursor(0, 40);
-	nokia_lcd_write_string(time_display, 1);
-	nokia_lcd_render();
-}
-
-//Metodo que imprime as bandeiras usadas pelo jogador
-void print_flags(int num_flags) {
-    char flags[6];
-    sprintf(flags,"%d",num_flags);
-    strcat(flags, "/14");
-    strcat(flags,"\004");
-
-    nokia_lcd_set_cursor(54,40);
-    nokia_lcd_write_string(flags, 1);
-    nokia_lcd_render();
-}
-
-// Metodo que imprime a matriz no display
-void print_field()
-{
-    for (int i = 0; i < 5; i++)
-    {
-        nokia_lcd_set_cursor(0, i * 8);
-        for (int j = 0; j < 14; j++)
-        {
-            switch (field[i][j])
-            {
-            case 'a':
-                nokia_lcd_write_string("\001", 1);
-                break; // clock
-            case 'b':
-                nokia_lcd_write_string("\002", 1);
-                break; // blank_space
-            case 'c':
-                nokia_lcd_write_string("\003", 1);
-                break; // selected_space
-            case 'd':
-                nokia_lcd_write_string("\004", 1);
-                break; // flag
-            case 'e':
-                nokia_lcd_write_string("\005", 1);
-                break; // mine
-            }
-        }
-    }
-}
-
-void print_start() {
-	nokia_lcd_write_string(
-			" AVR \005 Mines! "
-			"              "
-			" \0041\002\00232   11\002 "
-			" 1 2\005\002\0021 1\002\002\002 "
-			"              "
-			" Press CHECK! ",
-			1
-		);
-	nokia_lcd_render();
+    } else {
+		sec = 0;
+		min = 0;
+	}
 }
