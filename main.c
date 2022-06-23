@@ -130,7 +130,6 @@ void write_field()
     }
 }
 
-
 /**
  * Write the start menu to the screen.
  */
