@@ -1,1 +1,6 @@
 *_backup.simu
+*.sec
+*.hex
+*.lst
+*.elf
+*.o
