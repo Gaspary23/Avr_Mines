@@ -26,7 +26,7 @@ Circuit Id: KeyPad-14
 
 Unique  Id: Pcd8544-1: 
 Circuit Id: Pcd8544-1
-<item itemtype="Pcd8544" labelx="-32" labelrot="0" id="Pcd8544-1" vflip="1" labely="-66" rotation="0" y="-396" x="-176" mainComp="false" circRot="6.95039288786766e-310" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="true" objectName="Pcd8544-1"/>
+<item itemtype="Pcd8544" labelx="-32" labelrot="0" id="Pcd8544-1" vflip="1" labely="-66" rotation="0" y="-396" x="-168" mainComp="false" circRot="6.95039288786766e-310" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="true" objectName="Pcd8544-1"/>
 
 Unique  Id: atmega328-2: 
 Circuit Id: atmega328-2
@@ -34,23 +34,23 @@ Circuit Id: atmega328-2
 
 Unique  Id: Connector-3: 
 Circuit Id: Connector-3
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-3" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-33" y="-356" x="-144" pointList="-144,-356,-268,-356" startpinid="Pcd8544-1-PinScl" mainComp="false" endpinid="atmega328-2-PB5" circRot="6.95039288786766e-310" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-3"/>
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-3" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-33" y="-356" x="-136" pointList="-136,-356,-268,-356" startpinid="Pcd8544-1-PinScl" mainComp="false" endpinid="atmega328-2-PB5" circRot="6.95039288786766e-310" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-3"/>
 
 Unique  Id: Connector-7: 
 Circuit Id: Connector-7
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-7" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-34" y="-356" x="-160" pointList="-160,-356,-160,-348,-268,-348" startpinid="Pcd8544-1-PinSi" mainComp="false" endpinid="atmega328-2-PB4" circRot="2.37e-322" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-7"/>
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-7" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-34" y="-356" x="-152" pointList="-152,-356,-152,-348,-268,-348" startpinid="Pcd8544-1-PinSi" mainComp="false" endpinid="atmega328-2-PB4" circRot="2.37e-322" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-7"/>
 
 Unique  Id: Connector-8: 
 Circuit Id: Connector-8
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-8" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-35" y="-356" x="-176" pointList="-176,-356,-176,-340,-268,-340" startpinid="Pcd8544-1-PinDc" mainComp="false" endpinid="atmega328-2-PB3" circRot="8.901110291602932e-307" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-8"/>
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-8" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-35" y="-356" x="-168" pointList="-168,-356,-168,-340,-268,-340" startpinid="Pcd8544-1-PinDc" mainComp="false" endpinid="atmega328-2-PB3" circRot="8.901110291602932e-307" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-8"/>
 
 Unique  Id: Connector-11: 
 Circuit Id: Connector-11
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-11" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-36" y="-356" x="-192" pointList="-192,-356,-192,-324,-268,-324" startpinid="Pcd8544-1-PinCs" mainComp="false" endpinid="atmega328-2-PB1" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-11"/>
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-11" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-36" y="-356" x="-184" pointList="-184,-356,-184,-324,-268,-324" startpinid="Pcd8544-1-PinCs" mainComp="false" endpinid="atmega328-2-PB1" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-11"/>
 
 Unique  Id: Connector-12: 
 Circuit Id: Connector-12
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-12" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-37" y="-356" x="-208" pointList="-208,-356,-208,-332,-268,-332" startpinid="Pcd8544-1-PinRst" mainComp="false" endpinid="atmega328-2-PB2" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-12"/>
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-12" vflip="1" labely="-24" rotation="0" enodeid="Circ_eNode-37" y="-356" x="-200" pointList="-200,-356,-200,-332,-268,-332" startpinid="Pcd8544-1-PinRst" mainComp="false" endpinid="atmega328-2-PB2" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-12"/>
 
 Unique  Id: Connector-17: 
 Circuit Id: Connector-17

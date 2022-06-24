@@ -18,6 +18,8 @@
 int start = 1;
 int min, sec = 0;
 char field[5][14];
+uint8_t sel_x = 0;
+uint8_t sel_y = 0;
 
 #define TIMER_CLK		F_CPU / 1024
 // Update the timer once per second.
@@ -45,6 +47,7 @@ void write_start();
 void write_timer(uint8_t x, uint8_t y);
 void write_flag_count(int num_flags, uint8_t x, uint8_t y);
 void write_field();
+int move_overflowing(uint8_t sel, int x, int amount);
 
 int main(void)
 {
@@ -125,6 +128,10 @@ void write_field()
         nokia_lcd_set_cursor(0, i * 8);
 
         for (int j = 0; j < FIELD_WIDTH; j++) {
+			if (i == sel_y && j == sel_x) {
+				nokia_lcd_write_string("\003", 1);
+			}
+
             switch (field[i][j]) {
 				case Clock:
 					nokia_lcd_write_string("\001", 1);
@@ -162,6 +169,30 @@ void write_start() {
 }
 
 /**
+ * Move the cursor alongside the x or y axis,
+ * overflowing from one border to the other if necessary.
+ */
+int move_overflowing(uint8_t sel, int x, int amount) {
+	if (amount < 0 && sel < abs(amount)) {
+		return x ? FIELD_WIDTH - 1 : FIELD_HEIGHT - 1;
+	}
+
+	sel += amount;
+
+	if (x) {
+		if (sel >= FIELD_WIDTH) {
+			return 0;
+		}
+	} else {
+		if (sel >= FIELD_HEIGHT) {
+			return 0;
+		}
+	}
+
+	return sel;
+}
+
+/**
  * Increment the timer.
  */
 ISR(TIMER1_COMPA_vect)
@@ -184,14 +215,20 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(PCINT2_vect)
 {
+	// Handle movement.
+	if (UP) {
+		sel_y = move_overflowing(sel_y, 0, -1);
+	} else if (DOWN) {
+		sel_y = move_overflowing(sel_y, 0, 1);
+	} else if (LEFT) {
+		sel_x = move_overflowing(sel_x, 1, -1);
+	} else if (RIGHT) {
+		sel_x = move_overflowing(sel_x, 1, 1);
+	}
+
+	// Handle CHECK and FLAG.
 	if (CHECK) {
 		// DEBUG: Stop the timer.
 		start = 0;
-
-		while (CHECK) {
-			_delay_ms(1);
-		}
 	}
-
-	_delay_ms(1);
 }
