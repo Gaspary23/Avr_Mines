@@ -76,11 +76,11 @@ int main(void)
 	sei();
 
     nokia_lcd_init();
-    nokia_lcd_custom(1, CLOCK);
-    nokia_lcd_custom(2, SPACE);
-    nokia_lcd_custom(3, SELECTED);
-    nokia_lcd_custom(4, FLAG);
-    nokia_lcd_custom(5, MINE);
+    nokia_lcd_custom(1, CLOCK_GLYPH);
+    nokia_lcd_custom(2, SPACE_GLYPH);
+    nokia_lcd_custom(3, SELECTED_GLYPH);
+    nokia_lcd_custom(4, FLAG_GLYPH);
+    nokia_lcd_custom(5, MINE_GLYPH);
     int num_flags = 0;
 
     for (int i = 0; i < 5; i++) {
@@ -100,7 +100,7 @@ int main(void)
 
 		write_field();
 		write_timer(0, FIELD_HEIGHT * 8);
-		write_flag_count(num_flags, FIELD_WIDTH * 5 - 16, FIELD_HEIGHT * 8);
+		write_flag_count(num_flags, FIELD_WIDTH * 5 - 22, FIELD_HEIGHT * 8);
 		nokia_lcd_render();
 	}
 }
@@ -121,8 +121,8 @@ void write_timer(uint8_t x, uint8_t y)
  */
 void write_flag_count(int num_flags, uint8_t x, uint8_t y)
 {
-    char flags[6];
-    sprintf(flags, "%d/%d\004", num_flags, MINE_AMOUNT);
+    char flags[7];
+    sprintf(flags, "%02d/%02d\004", num_flags, MINE_AMOUNT);
     nokia_lcd_set_cursor(x, y);
     nokia_lcd_write_string(flags, 1);
 }

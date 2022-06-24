@@ -1,12 +1,12 @@
 <circuit noLinAcc="5" animate="0" Speed_sps="1000000" type="simulide_0.4" reactStep="50" Speed_per="100" Simu_Step_nS="1000">
 
+Unique  Id: Node-59: 
+Circuit Id: Node-59
+<item itemtype="Node" labelx="-16" labelrot="0" id="Node-59" vflip="1" labely="-24" rotation="0" y="-428" x="-360" mainComp="false" circRot="6.90136028089815e-310" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Node-59"/>
+
 Unique  Id: Rail-50: 
 Circuit Id: Rail-45
 <item itemtype="Rail" labelx="-16" labelrot="0" id="Rail-45" vflip="1" labely="-24" rotation="0" y="-428" x="-340" mainComp="false" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="-16" Voltage="5" Unit=" V" circPos="0,0" boardRot="-1e+06" hflip="-1" valLabely="8" Show_id="false" objectName="Rail-50" Show_Volt="false"/>
-
-Unique  Id: Rail-45: 
-Circuit Id: Rail-45
-<item itemtype="Rail" labelx="-16" labelrot="0" id="Rail-45" vflip="1" labely="-24" rotation="0" y="-356" x="-340" mainComp="false" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="-16" Voltage="5" Unit=" V" circPos="0,0" boardRot="-1e+06" hflip="-1" valLabely="8" Show_id="false" objectName="Rail-45" Show_Volt="false"/>
 
 Unique  Id: TextComponent-32: 
 Circuit Id: TextComponent-132
@@ -60,10 +60,6 @@ Unique  Id: Connector-48:
 Circuit Id: Connector-48
 <item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-48" vflip="1" labely="-24" rotation="0" enodeid="enode-48" y="-340" x="-396" pointList="-396,-340,-396,-332,-316,-332" startpinid="KeyPad-15-Pin1" mainComp="false" endpinid="atmega328-2-PD7" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-48"/>
 
-Unique  Id: Connector-49: 
-Circuit Id: Connector-49
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-49" vflip="1" labely="-24" rotation="0" enodeid="enode-49" y="-356" x="-356" pointList="-356,-356,-364,-356" startpinid="Rail-45-outnod" mainComp="false" endpinid="KeyPad-15-Pin0" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-49"/>
-
 Unique  Id: Connector-54: 
 Circuit Id: Connector-54
 <item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-54" vflip="1" labely="-24" rotation="0" enodeid="enode-54" y="-412" x="-380" pointList="-380,-412,-380,-388,-316,-388" startpinid="KeyPad-14-Pin4" mainComp="false" endpinid="atmega328-2-PD4" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-54"/>
@@ -82,6 +78,14 @@ Circuit Id: Connector-57
 
 Unique  Id: Connector-58: 
 Circuit Id: Connector-58
-<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-58" vflip="1" labely="-24" rotation="0" enodeid="enode-58" y="-428" x="-356" pointList="-356,-428,-364,-428" startpinid="Rail-50-outnod" mainComp="false" endpinid="KeyPad-14-Pin0" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-58"/>
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-58" vflip="1" labely="-24" rotation="0" enodeid="enode-61" y="-428" x="-356" pointList="-356,-428,-360,-428" startpinid="Rail-50-outnod" mainComp="false" endpinid="Node-59-0" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-58"/>
+
+Unique  Id: Connector-60: 
+Circuit Id: Connector-60
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-60" vflip="1" labely="-24" rotation="0" enodeid="enode-61" y="-428" x="-360" pointList="-360,-428,-364,-428" startpinid="Node-59-2" mainComp="false" endpinid="KeyPad-14-Pin0" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-60"/>
+
+Unique  Id: Connector-61: 
+Circuit Id: Connector-61
+<item itemtype="Connector" labelx="-16" labelrot="0" id="Connector-61" vflip="1" labely="-24" rotation="0" enodeid="enode-61" y="-428" x="-360" pointList="-360,-428,-360,-356,-364,-356" startpinid="Node-59-1" mainComp="false" endpinid="KeyPad-15-Pin0" circRot="0" boardPos="-1e+06,-1e+06" valLabRot="0" valLabelx="0" circPos="0,0" boardRot="-1e+06" hflip="1" valLabely="0" Show_id="false" objectName="Connector-61"/>
  
 </circuit>
