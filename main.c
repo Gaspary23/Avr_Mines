@@ -32,6 +32,7 @@
 int playing = 0;
 int min, sec = 0;
 int num_flags = 0;
+int seed = 0;
 char field[FIELD_HEIGHT][FIELD_WIDTH];
 uint8_t sel_x = 0;
 uint8_t sel_y = 0;
@@ -96,15 +97,36 @@ int main(void)
 	{
 		while (!playing)
 		{
+			seed++;
 			nokia_lcd_render();
 		}
 
 		nokia_lcd_clear();
+		srand(seed);
+		generate_mines();
 
 		write_field();
 		write_timer(0, FIELD_HEIGHT * 8);
 		write_flag_count(FIELD_WIDTH * 5 - 22, FIELD_HEIGHT * 8);
 		nokia_lcd_render();
+	}
+}
+
+/*
+ * Fill the field with mines 
+ */
+void generate_mines()
+{
+	for (int x = 0; x < MINE_AMOUNT; x++)
+	{
+		int i = rand() % FIELD_HEIGHT;
+		int j = rand() % FIELD_WIDTH;
+
+		if(field[i][j] != Mine)
+		{
+			field[i][j] = Mine;
+			x++;
+		}
 	}
 }
 
