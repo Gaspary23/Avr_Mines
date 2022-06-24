@@ -15,12 +15,6 @@
 #include "chars.h"
 #include "nokia5110.h"
 
-int start = 1;
-int min, sec = 0;
-char field[5][14];
-uint8_t sel_x = 0;
-uint8_t sel_y = 0;
-
 #define TIMER_CLK		F_CPU / 1024
 // Update the timer once per second.
 #define TIMER_FREQ		01
@@ -34,6 +28,12 @@ uint8_t sel_y = 0;
 #define RIGHT			PIND & (1 << PD4)
 #define FLAG			PIND & (1 << PD6)
 #define CHECK			PIND & (1 << PD7)
+
+int playing = 0;
+int min, sec = 0;
+char field[FIELD_HEIGHT][FIELD_WIDTH];
+uint8_t sel_x = 0;
+uint8_t sel_y = 0;
 
 enum Tile {
 	Clock = 'a',
@@ -89,7 +89,15 @@ int main(void)
         }
     }
 
+	write_start();
+
 	while (1) {
+		while (!playing) {
+			nokia_lcd_render();
+		}
+
+		nokia_lcd_clear();
+
 		write_field();
 		write_timer(0, FIELD_HEIGHT * 8);
 		write_flag_count(num_flags, FIELD_WIDTH * 5 - 16, FIELD_HEIGHT * 8);
@@ -158,10 +166,9 @@ void write_field()
  */
 void write_start() {
 	nokia_lcd_write_string(
-		" AVR \005 Mines! "
 		"              "
-		" \0041\002\00232   11\002 "
-		" 1 2\005\002\0021 1\002\002\002 "
+		"              "
+		" AVR \005 Mines! "
 		"              "
 		" Press CHECK! ",
 		1
@@ -197,16 +204,11 @@ int move_overflowing(uint8_t sel, int x, int amount) {
  */
 ISR(TIMER1_COMPA_vect)
 {
-    if (start) {
-        sec++;
+	sec++;
 
-        if (sec >= 60) {
-            sec = 0;
-            min++;
-        }
-    } else {
+	if (sec >= 60) {
 		sec = 0;
-		min = 0;
+		min++;
 	}
 }
 
@@ -216,19 +218,22 @@ ISR(TIMER1_COMPA_vect)
 ISR(PCINT2_vect)
 {
 	// Handle movement.
-	if (UP) {
-		sel_y = move_overflowing(sel_y, 0, -1);
-	} else if (DOWN) {
-		sel_y = move_overflowing(sel_y, 0, 1);
-	} else if (LEFT) {
-		sel_x = move_overflowing(sel_x, 1, -1);
-	} else if (RIGHT) {
-		sel_x = move_overflowing(sel_x, 1, 1);
+	if (playing) {
+		if (UP) {
+			sel_y = move_overflowing(sel_y, 0, -1);
+		} else if (DOWN) {
+			sel_y = move_overflowing(sel_y, 0, 1);
+		} else if (LEFT) {
+			sel_x = move_overflowing(sel_x, 1, -1);
+		} else if (RIGHT) {
+			sel_x = move_overflowing(sel_x, 1, 1);
+		}
 	}
 
 	// Handle CHECK and FLAG.
 	if (CHECK) {
-		// DEBUG: Stop the timer.
-		start = 0;
+		if (!playing) {
+			playing = 1;
+		}
 	}
 }
