@@ -52,6 +52,7 @@ void write_timer(uint8_t x, uint8_t y);
 void write_flag_count(uint8_t x, uint8_t y);
 void write_field();
 void reset_field();
+void generate_mines();
 int move_overflowing(uint8_t sel, int x, int amount);
 
 int main(void)
@@ -132,7 +133,7 @@ void reset_field()
  */
 void generate_mines()
 {
-	for (int x = 0; x < MINE_AMOUNT; x++)
+	for (int mines = 0; mines < MINE_AMOUNT;)
 	{
 		int i = rand() % FIELD_HEIGHT;
 		int j = rand() % FIELD_WIDTH;
@@ -140,7 +141,7 @@ void generate_mines()
 		if(field[i][j] != Mine)
 		{
 			field[i][j] = Mine;
-			x++;
+			mines++;
 		}
 	}
 }
