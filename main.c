@@ -30,6 +30,7 @@
 #define CHECK PIND &(1 << PD7)
 
 int playing = 0;
+int lost = 0;
 int min, sec = 0;
 int num_flags = 0;
 int seed = 0;
@@ -86,14 +87,23 @@ int main(void)
 	nokia_lcd_custom(4, FLAG_GLYPH);
 	nokia_lcd_custom(5, MINE_GLYPH);
 
-	write_start();
-
 	while (1)
 	{
 		while (!playing)
 		{
-			seed++;
-			nokia_lcd_render();
+			if (!lost)
+			{
+				write_start();
+				seed++;
+				nokia_lcd_render();
+			}
+			else
+			{
+				write_end();
+				nokia_lcd_set_cursor(0, FIELD_HEIGHT * 8);
+				nokia_lcd_write_string("  Press FLAG", 1);
+				nokia_lcd_render();
+			}
 		}
 
 		nokia_lcd_clear();
@@ -138,7 +148,7 @@ void generate_mines()
 		int i = rand() % FIELD_HEIGHT;
 		int j = rand() % FIELD_WIDTH;
 
-		if(field[i][j] != Mine)
+		if (field[i][j] != Mine)
 		{
 			field[i][j] = Mine;
 			mines++;
@@ -178,7 +188,7 @@ void write_field()
 		nokia_lcd_set_cursor(0, i * 8);
 		for (int j = 0; j < FIELD_WIDTH; j++)
 		{
-			if (i == sel_y && j == sel_x)
+			if (i == sel_y && j == sel_x && !lost)
 			{
 				nokia_lcd_write_string("\003", 1);
 			}
@@ -186,27 +196,26 @@ void write_field()
 			{
 				switch (field_view[i][j])
 				{
-					case Clock:
-						nokia_lcd_write_string("\001", 1);
-						continue;
-					case Blank:
-						nokia_lcd_write_string("\002", 1);
-						continue;
-					case Flag:
-						nokia_lcd_write_string("\004", 1);
-						continue;
-					case Mine:
-						nokia_lcd_write_string("\005", 1);
-						continue;
-					case '0':
-						nokia_lcd_write_string(" ", 1);
-						continue;
+				case Clock:
+					nokia_lcd_write_string("\001", 1);
+					continue;
+				case Blank:
+					nokia_lcd_write_string("\002", 1);
+					continue;
+				case Flag:
+					nokia_lcd_write_string("\004", 1);
+					continue;
+				case Mine:
+					nokia_lcd_write_string("\005", 1);
+					continue;
+				case '0':
+					nokia_lcd_write_string(" ", 1);
+					continue;
 				}
 
 				nokia_lcd_write_string(
-						field_view[1][j] - '0',
-						1
-				);
+					field_view[1][j] - '0',
+					1);
 			}
 		}
 	}
@@ -217,6 +226,7 @@ void write_field()
  */
 void write_start()
 {
+	nokia_lcd_clear();
 	nokia_lcd_write_string(
 		"              "
 		" AVR \005 Mines! "
@@ -224,6 +234,20 @@ void write_start()
 		" Press CHECK! "
 		"			   ",
 		1);
+}
+
+void write_end()
+{
+	nokia_lcd_clear();
+	for (int i = 0; i < FIELD_HEIGHT; i++)
+	{
+		for (int j = 0; j < FIELD_WIDTH; j++)
+		{
+			field_view[i][j] = field[i][j];
+		}
+	}
+	field_view[sel_y][sel_x] = Mine;
+	write_field();
 }
 
 /**
@@ -299,11 +323,24 @@ ISR(PCINT2_vect)
 	// Handle CHECK and FLAG.
 	if (CHECK)
 	{
-		if (!playing)
+		if (!playing && !lost)
 		{
+			sec = 0;
+			min = 0;
 			playing = 1;
-		} else {
-			field_view[sel_y][sel_x] = field[sel_y][sel_x];
+		}
+		else
+		{
+			switch (field[sel_y][sel_x])
+			{
+			case '0':
+				field_view[sel_y][sel_x] = '0';
+				break;
+			case Mine:
+				lost = 1;
+				playing = 0;
+				break;
+			}
 		}
 	}
 
@@ -321,6 +358,11 @@ ISR(PCINT2_vect)
 				field_view[sel_y][sel_x] = Blank;
 				num_flags -= 1;
 			}
+		}
+		if (lost)
+		{
+			num_flags = 0;
+			lost = 0;
 		}
 	}
 }
