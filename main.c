@@ -331,6 +331,8 @@ ISR(PCINT2_vect)
 		}
 		else
 		{
+			if (field_view[sel_y][sel_x] == Flag)
+				num_flags--;
 			switch (field[sel_y][sel_x])
 			{
 			case '0':
