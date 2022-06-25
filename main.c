@@ -36,7 +36,8 @@ typedef struct field
 	int mine;
 	int flagged;
 	int revealed;
-} Field;
+}
+Field;
 
 int playing = 0;
 int lost = 0;
@@ -63,14 +64,19 @@ int main()
 {
 	setup();
 
-	while (1) {
-		while (!playing) {
+	while (1)
+	{
+		while (!playing)
+		{
 			nokia_lcd_clear();
 
-			if (!lost) {
+			if (!lost)
+			{
 				write_start();
 				seed++;
-			} else {
+			}
+			else
+			{
 				reveal_board();
 				write_board();
 				nokia_lcd_set_cursor(0, FIELD_HEIGHT * 8);
@@ -83,7 +89,8 @@ int main()
 		srand(seed);
 		reset_board();
 
-		while (playing) {
+		while (playing)
+		{
 			nokia_lcd_clear();
 			write_board();
 			write_timer(0, FIELD_HEIGHT * 8);
@@ -100,7 +107,8 @@ ISR(TIMER1_COMPA_vect)
 {
 	sec++;
 
-	if (sec >= 60) {
+	if (sec >= 60)
+	{
 		sec = 0;
 		min++;
 	}
@@ -111,7 +119,8 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(PCINT2_vect)
 {
-	if (playing) {
+	if (playing)
+	{
 		handle_movement();
 	}
 
@@ -120,29 +129,41 @@ ISR(PCINT2_vect)
 
 void handle_buttons(Field *sel_field)
 {
-	if (CHECK) {
-		if (!playing && !lost) {
+	if (CHECK)
+	{
+		if (!playing && !lost)
+		{
 			sec = 0;
 			min = 0;
 			playing = 1;
-		} else {
+		}
+		else
+		{
 			sel_field->revealed = 1;
 
-			if (sel_field->mine) {
+			if (sel_field->mine)
+			{
 				lost = 1;
 				playing = 0;
-			} else {
+			}
+			else
+			{
 				num_flags = sel_field->flagged ? num_flags - 1 : num_flags;
 				sel_field->flagged = 0;
 			}
 		}
-	} else if (FLAG) {
-		if (!playing && lost) {
+	}
+	else if (FLAG)
+	{
+		if (!playing && lost)
+		{
 			lost = 0;
 			sel_y = 0;
 			sel_x = 0;
 			num_flags = 0;
-		} else if (!sel_field->revealed) {
+		}
+		else if (!sel_field->revealed)
+		{
 			sel_field->flagged ^= 1;
 			num_flags = sel_field->flagged ? num_flags + 1 : num_flags - 1;
 		}
@@ -151,13 +172,20 @@ void handle_buttons(Field *sel_field)
 
 void handle_movement()
 {
-	if (UP) {
+	if (UP)
+	{
 		sel_y = move_overflowing(sel_y, 0, -1);
-	} else if (DOWN) {
+	}
+	else if (DOWN)
+	{
 		sel_y = move_overflowing(sel_y, 0, 1);
-	} else if (LEFT) {
+	}
+	else if (LEFT)
+	{
 		sel_x = move_overflowing(sel_x, 1, -1);
-	} else if (RIGHT) {
+	}
+	else if (RIGHT)
+	{
 		sel_x = move_overflowing(sel_x, 1, 1);
 	}
 }
@@ -168,18 +196,24 @@ void handle_movement()
  */
 int move_overflowing(uint8_t sel, int x, int amount)
 {
-	if (amount < 0 && sel < abs(amount)) {
+	if (amount < 0 && sel < abs(amount))
+	{
 		return x ? FIELD_WIDTH - 1 : FIELD_HEIGHT - 1;
 	}
 
 	sel += amount;
 
-	if (x) {
-		if (sel >= FIELD_WIDTH) {
+	if (x)
+	{
+		if (sel >= FIELD_WIDTH)
+		{
 			return 0;
 		}
-	} else {
-		if (sel >= FIELD_HEIGHT) {
+	}
+	else
+	{
+		if (sel >= FIELD_HEIGHT)
+		{
 			return 0;
 		}
 	}
@@ -193,8 +227,10 @@ int move_overflowing(uint8_t sel, int x, int amount)
  */
 void reset_board()
 {
-	for (int i = 0; i < FIELD_HEIGHT; i++) {
-		for (int j = 0; j < FIELD_WIDTH; j++) {
+	for (int i = 0; i < FIELD_HEIGHT; i++)
+	{
+		for (int j = 0; j < FIELD_WIDTH; j++)
+		{
 			board[i][j] = (Field) {0, 0, 0};
 		}
 	}
@@ -207,8 +243,10 @@ void reset_board()
  */
 void reveal_board()
 {
-	for (int i = 0; i < FIELD_HEIGHT; i++) {
-		for (int j = 0; j < FIELD_WIDTH; j++) {
+	for (int i = 0; i < FIELD_HEIGHT; i++)
+	{
+		for (int j = 0; j < FIELD_WIDTH; j++)
+		{
 			board[i][j].revealed = 1;
 		}
 	}
@@ -219,11 +257,13 @@ void reveal_board()
  */
 void generate_mines()
 {
-	for (int mines = 0; mines < MINE_AMOUNT;) {
+	for (int mines = 0; mines < MINE_AMOUNT;)
+	{
 		int i = rand() % FIELD_HEIGHT;
 		int j = rand() % FIELD_WIDTH;
 
-		if (!board[i][j].mine) {
+		if (!board[i][j].mine)
+		{
 			board[i][j].mine = 1;
 			mines++;
 		}
@@ -235,27 +275,38 @@ void generate_mines()
  */
 void write_board()
 {
-	for (int i = 0; i < FIELD_HEIGHT; i++) {
+	for (int i = 0; i < FIELD_HEIGHT; i++)
+	{
 		// Set the cursor to the start of the line.
 		nokia_lcd_set_cursor(0, i * 8);
 
-		for (int j = 0; j < FIELD_WIDTH; j++) {
-			if (i == sel_y && j == sel_x && !lost) {
+		for (int j = 0; j < FIELD_WIDTH; j++)
+		{
+			if (i == sel_y && j == sel_x && !lost)
+			{
 				nokia_lcd_write_string("\003", 1);
 				continue;
 			}
 
 			Field field = board[i][j];
 
-			if (!field.revealed) {
-				if (field.flagged) {
+			if (!field.revealed)
+			{
+				if (field.flagged)
+				{
 					nokia_lcd_write_string("\004", 1);
-				} else {
+				}
+				else
+				{
 					nokia_lcd_write_string("\002", 1);
 				}
-			} else if (field.mine) {
+			}
+			else if (field.mine)
+			{
 				nokia_lcd_write_string("\005", 1);
-			} else {
+			}
+			else
+			{
 				// TODO: write number of neighbouring bombs.
 				nokia_lcd_write_string(" ", 1);
 			}
