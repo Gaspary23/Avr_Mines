@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+const uint8_t BLANK_GLYPHS[] = {
+	' ', '1', '2', '3', '4', '5', '6', '7', '8'
+};
+
 const uint8_t CLOCK_GLYPH[] = {
 	0b00011100,
 	0b00100010,

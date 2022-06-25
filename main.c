@@ -34,6 +34,7 @@ int min, sec = 0;
 int num_flags = 0;
 int seed = 0;
 char field[FIELD_HEIGHT][FIELD_WIDTH];
+char field_view[FIELD_HEIGHT][FIELD_WIDTH];
 uint8_t sel_x = 0;
 uint8_t sel_y = 0;
 
@@ -50,6 +51,7 @@ void write_start();
 void write_timer(uint8_t x, uint8_t y);
 void write_flag_count(uint8_t x, uint8_t y);
 void write_field();
+void reset_field();
 int move_overflowing(uint8_t sel, int x, int amount);
 
 int main(void)
@@ -83,14 +85,6 @@ int main(void)
 	nokia_lcd_custom(4, FLAG_GLYPH);
 	nokia_lcd_custom(5, MINE_GLYPH);
 
-	for (int i = 0; i < FIELD_HEIGHT; i++)
-	{
-		for (int j = 0; j < FIELD_WIDTH; j++)
-		{
-			field[i][j] = Blank;
-		}
-	}
-
 	write_start();
 
 	while (1)
@@ -103,17 +97,38 @@ int main(void)
 
 		nokia_lcd_clear();
 		srand(seed);
-		generate_mines();
+		reset_field();
 
-		write_field();
-		write_timer(0, FIELD_HEIGHT * 8);
-		write_flag_count(FIELD_WIDTH * 5 - 22, FIELD_HEIGHT * 8);
-		nokia_lcd_render();
+		while (playing)
+		{
+			write_field();
+			write_timer(0, FIELD_HEIGHT * 8);
+			write_flag_count(FIELD_WIDTH * 5 - 22, FIELD_HEIGHT * 8);
+			nokia_lcd_render();
+		}
 	}
 }
 
 /*
- * Fill the field with mines 
+ * Resets the field and the view to its initial state.
+ * Mines are then regenerated.
+ */
+void reset_field()
+{
+	for (int i = 0; i < FIELD_HEIGHT; i++)
+	{
+		for (int j = 0; j < FIELD_WIDTH; j++)
+		{
+			field[i][j] = '0';
+			field_view[i][j] = Blank;
+		}
+	}
+
+	generate_mines();
+}
+
+/*
+ * Fill the field with mines.
  */
 void generate_mines()
 {
@@ -168,21 +183,29 @@ void write_field()
 			}
 			else
 			{
-				switch (field[i][j])
+				switch (field_view[i][j])
 				{
-				case Clock:
-					nokia_lcd_write_string("\001", 1);
-					break;
-				case Blank:
-					nokia_lcd_write_string("\002", 1);
-					break;
-				case Flag:
-					nokia_lcd_write_string("\004", 1);
-					break;
-				case Mine:
-					nokia_lcd_write_string("\005", 1);
-					break;
+					case Clock:
+						nokia_lcd_write_string("\001", 1);
+						continue;
+					case Blank:
+						nokia_lcd_write_string("\002", 1);
+						continue;
+					case Flag:
+						nokia_lcd_write_string("\004", 1);
+						continue;
+					case Mine:
+						nokia_lcd_write_string("\005", 1);
+						continue;
+					case '0':
+						nokia_lcd_write_string(" ", 1);
+						continue;
 				}
+
+				nokia_lcd_write_string(
+						field_view[1][j] - '0',
+						1
+				);
 			}
 		}
 	}
@@ -278,6 +301,8 @@ ISR(PCINT2_vect)
 		if (!playing)
 		{
 			playing = 1;
+		} else {
+			field_view[sel_y][sel_x] = field[sel_y][sel_x];
 		}
 	}
 
@@ -285,14 +310,14 @@ ISR(PCINT2_vect)
 	{
 		if (playing)
 		{
-			if (field[sel_y][sel_x] == Blank)
+			if (field_view[sel_y][sel_x] == Blank)
 			{
-				field[sel_y][sel_x] = Flag;
+				field_view[sel_y][sel_x] = Flag;
 				num_flags += 1;
 			}
-			else if (field[sel_y][sel_x] == Flag)
+			else if (field_view[sel_y][sel_x] == Flag)
 			{
-				field[sel_y][sel_x] = Blank;
+				field_view[sel_y][sel_x] = Blank;
 				num_flags -= 1;
 			}
 		}
