@@ -15,6 +15,7 @@
 
 #include "chars.h"
 #include "nokia5110.h"
+#include "usart.h"
 
 #define TIMER_CLK F_CPU / 1024
 // Update the timer once per second.
@@ -48,7 +49,7 @@ uint8_t sel_y = 0;
 
 void reveal_board();
 void generate_mines();
-void handle_buttons(Field sel_field);
+void handle_buttons(Field *sel_field);
 void handle_movement();
 int move_overflowing(uint8_t sel, int x, int amount);
 void reset_board();
@@ -58,7 +59,7 @@ void write_flag_count(uint8_t x, uint8_t y);
 void write_start();
 void write_timer(uint8_t x, uint8_t y);
 
-void main()
+int main()
 {
 	setup();
 
@@ -205,7 +206,7 @@ void reveal_board()
 	}
 }
 
-void handle_buttons(Field sel_field)
+void handle_buttons(Field *sel_field)
 {
 	if (CHECK) {
 		if (!playing && !lost) {
@@ -213,14 +214,14 @@ void handle_buttons(Field sel_field)
 			min = 0;
 			playing = 1;
 		} else {
-			sel_field.revealed = 1;
+			sel_field->revealed = 1;
 
-			if (sel_field.mine) {
+			if (sel_field->mine) {
 				lost = 1;
 				playing = 0;
 			} else {
-				num_flags = sel_field.flagged ? num_flags - 1 : num_flags;
-				sel_field.flagged = 0;
+				num_flags = sel_field->flagged ? num_flags - 1 : num_flags;
+				sel_field->flagged = 0;
 			}
 		}
 	} else if (FLAG) {
@@ -229,14 +230,9 @@ void handle_buttons(Field sel_field)
 			sel_y = 0;
 			sel_x = 0;
 			num_flags = 0;
-		} else if (!sel_field.revealed) {
-			if (sel_field.flagged) {
-				sel_field.flagged = 0;
-				num_flags--;
-			} else {
-				sel_field.flagged = 1;
-				num_flags++;
-			}
+		} else if (!sel_field->revealed) {
+			sel_field->flagged ^= 1;
+			num_flags = sel_field->flagged ? num_flags + 1 : num_flags - 1;
 		}
 	}
 }
@@ -301,7 +297,7 @@ ISR(PCINT2_vect)
 		handle_movement();
 	}
 
-	handle_buttons(board[sel_y][sel_x]);
+	handle_buttons(&board[sel_y][sel_x]);
 }
 
 /**
@@ -337,4 +333,7 @@ void setup()
 	nokia_lcd_custom(3, SELECTED_GLYPH);
 	nokia_lcd_custom(4, FLAG_GLYPH);
 	nokia_lcd_custom(5, MINE_GLYPH);
+
+	// Initialize USART for debugging purposes.
+	USART_Init();
 }
