@@ -295,20 +295,40 @@ void reveal_board()
 }
 
 /*
- * Fill the board with mines.
+ * Fill the board with mines, skipping the last field.
+ *
+ * If the first field the player reveals turns out to be a mine,
+ * it will be moved there. This way, the game can never be lost
+ * on the first button press.
  */
 void generate_mines()
 {
-	for (int mines = 0; mines < MINE_AMOUNT;)
-	{
-		int i = rand() % BOARD_HEIGHT;
-		int j = rand() % BOARD_WIDTH;
+	int mines_generated = 0;
+	int fields_left = BOARD_HEIGHT * BOARD_WIDTH - 1;
 
-		if (!board[i][j].mine)
+	for (int i=0; i < BOARD_HEIGHT; i++)
+	{
+		for (int j = 0; j < BOARD_WIDTH; j++) {
+			float rand_res = (float) rand() / (float) RAND_MAX;
+
+			if (fields_left * rand_res < MINE_AMOUNT - mines_generated)
+			{
+				board[i][j].mine = 1;
+				mines_generated++;
+				increment_neighbours(i,j);
+
+				if (mines_generated == MINE_AMOUNT)
+				{
+					break;
+				}
+			}
+
+			fields_left--;
+		}
+
+		if (mines_generated == MINE_AMOUNT)
 		{
-			board[i][j].mine = 1;
-			increment_neighbours(i,j);
-			mines++;
+			break;
 		}
 	}
 }
@@ -323,7 +343,7 @@ void increment_neighbours(int i, int j) {
 			int b = j+y;
 			if (
 				a >= 0 &&
-				a < BOARD_HEIGHT && 
+				a < BOARD_HEIGHT &&
 				b >= 0 &&
 				b < BOARD_WIDTH
 			) {
@@ -375,7 +395,7 @@ void write_board()
 				if (field.num_mines > 0) {
 					char value[3];
 					sprintf(value, "%d", field.num_mines);
-					nokia_lcd_write_string(value, 1);				
+					nokia_lcd_write_string(value, 1);
 				} else {
 					nokia_lcd_write_string(" ", 1);
 				}
