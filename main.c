@@ -31,6 +31,9 @@
 #define FLAG PIND &(1 << PD6)
 #define CHECK PIND &(1 << PD7)
 
+/*
+ * Represent a field in the board.
+ */
 typedef struct field
 {
 	int mine;
@@ -39,14 +42,29 @@ typedef struct field
 }
 Field;
 
-int playing = 0;
-int lost = 0;
-int min, sec = 0;
-int num_flags = 0;
-int seed = 0;
+/*
+ * Represent a game state.
+ */
+typedef enum state
+{
+	// Initial state. represents the start menu.
+	MENU,
+	// Represents gameplay before the first field is revealed.
+	START,
+	// Represents the rest of gameplay until victory or defeat.
+	PLAYING,
+	DEFEAT,
+	VICTORY
+}
+State;
+
 Field board[BOARD_HEIGHT][BOARD_WIDTH];
 uint8_t sel_x = 0;
 uint8_t sel_y = 0;
+State game_state = MENU;
+int min, sec = 0;
+int seed = 0;
+int num_flags = 0;
 
 void reveal_board();
 void generate_mines();
@@ -56,9 +74,11 @@ int move_wrapping(uint8_t sel, int x, int amount);
 void reset_board();
 void setup();
 void write_board();
+void write_defeat();
 void write_flag_count(uint8_t x, uint8_t y);
-void write_start();
+void write_menu();
 void write_timer(uint8_t x, uint8_t y);
+void write_victory();
 
 int main()
 {
@@ -66,35 +86,41 @@ int main()
 
 	while (1)
 	{
-		while (!playing)
+		while (game_state == MENU)
 		{
 			nokia_lcd_clear();
-
-			if (!lost)
-			{
-				write_start();
-				seed++;
-			}
-			else
-			{
-				reveal_board();
-				write_board();
-				nokia_lcd_set_cursor(0, BOARD_HEIGHT * 8);
-				nokia_lcd_write_string("  Press FLAG  ", 1);
-			}
-
+			write_menu();
+			// Obtain a random seed from the time taken to start gameplay.
+			seed++;
 			nokia_lcd_render();
 		}
 
 		srand(seed);
 		reset_board();
 
-		while (playing)
+		while (game_state == START || game_state == PLAYING)
 		{
 			nokia_lcd_clear();
 			write_board();
 			write_timer(0, BOARD_HEIGHT * 8);
 			write_flag_count(BOARD_WIDTH * 5 - 22, BOARD_HEIGHT * 8);
+			nokia_lcd_render();
+		}
+
+		nokia_lcd_clear();
+		reveal_board();
+		write_board();
+
+		if (game_state == DEFEAT)
+		{
+			write_defeat();
+		}
+		else
+		{
+			write_victory();
+		}
+
+		while (game_state != MENU) {
 			nokia_lcd_render();
 		}
 	}
@@ -105,12 +131,15 @@ int main()
  */
 ISR(TIMER1_COMPA_vect)
 {
-	sec++;
-
-	if (sec >= 60)
+	if (game_state == PLAYING)
 	{
-		sec = 0;
-		min++;
+		sec++;
+
+		if (sec >= 60)
+		{
+			sec = 0;
+			min++;
+		}
 	}
 }
 
@@ -119,7 +148,7 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(PCINT2_vect)
 {
-	if (playing)
+	if (game_state == START || game_state == PLAYING)
 	{
 		handle_movement();
 	}
@@ -131,20 +160,19 @@ void handle_buttons(Field *sel_field)
 {
 	if (CHECK)
 	{
-		if (!playing && !lost)
+		if (game_state == MENU)
 		{
 			sec = 0;
 			min = 0;
-			playing = 1;
+			game_state = START;
 		}
-		else
+		else if (game_state == START || game_state == PLAYING)
 		{
 			sel_field->revealed = 1;
 
 			if (sel_field->mine)
 			{
-				lost = 1;
-				playing = 0;
+				game_state = DEFEAT;
 			}
 			else
 			{
@@ -155,9 +183,9 @@ void handle_buttons(Field *sel_field)
 	}
 	else if (FLAG)
 	{
-		if (!playing && lost)
+		if (game_state == DEFEAT || game_state == VICTORY)
 		{
-			lost = 0;
+			game_state = MENU;
 			sel_y = 0;
 			sel_x = 0;
 			num_flags = 0;
@@ -282,8 +310,10 @@ void write_board()
 
 		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
-			if (i == sel_y && j == sel_x && !lost)
-			{
+			if (
+				i == sel_y && j == sel_x
+				&& (game_state == START || game_state == PLAYING)
+			) {
 				nokia_lcd_write_string("\003", 1);
 				continue;
 			}
@@ -337,9 +367,27 @@ void write_timer(uint8_t x, uint8_t y)
 }
 
 /**
+ * Write the victory message to the screen.
+ */
+void write_victory()
+{
+	nokia_lcd_set_cursor(0, BOARD_HEIGHT * 8);
+	nokia_lcd_write_string("B) Press FLAG ", 1);
+}
+
+/**
+ * Write the defeat message to the screen.
+ */
+void write_defeat()
+{
+	nokia_lcd_set_cursor(0, BOARD_HEIGHT * 8);
+	nokia_lcd_write_string("xO Press FLAG ", 1);
+}
+
+/**
  * Write the start menu to the screen.
  */
-void write_start()
+void write_menu()
 {
 	nokia_lcd_write_string(
 		"              "
