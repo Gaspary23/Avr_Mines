@@ -19,10 +19,10 @@
 
 #define TIMER_CLK F_CPU / 1024
 // Update the timer once per second.
-#define TIMER_FREQ 01
-// Specify the minefield's dimensions in lines and columns.
-#define FIELD_WIDTH 14
-#define FIELD_HEIGHT 05
+#define TIMER_FREQ 1
+// Specify the board's dimensions in lines and columns.
+#define BOARD_WIDTH 14
+#define BOARD_HEIGHT 5
 #define MINE_AMOUNT 14
 #define UP PIND &(1 << PD1)
 #define LEFT PIND &(1 << PD2)
@@ -44,7 +44,7 @@ int lost = 0;
 int min, sec = 0;
 int num_flags = 0;
 int seed = 0;
-Field board[FIELD_HEIGHT][FIELD_WIDTH];
+Field board[BOARD_HEIGHT][BOARD_WIDTH];
 uint8_t sel_x = 0;
 uint8_t sel_y = 0;
 
@@ -52,7 +52,7 @@ void reveal_board();
 void generate_mines();
 void handle_buttons(Field *sel_field);
 void handle_movement();
-int move_overflowing(uint8_t sel, int x, int amount);
+int move_wrapping(uint8_t sel, int x, int amount);
 void reset_board();
 void setup();
 void write_board();
@@ -79,7 +79,7 @@ int main()
 			{
 				reveal_board();
 				write_board();
-				nokia_lcd_set_cursor(0, FIELD_HEIGHT * 8);
+				nokia_lcd_set_cursor(0, BOARD_HEIGHT * 8);
 				nokia_lcd_write_string("  Press FLAG  ", 1);
 			}
 
@@ -93,8 +93,8 @@ int main()
 		{
 			nokia_lcd_clear();
 			write_board();
-			write_timer(0, FIELD_HEIGHT * 8);
-			write_flag_count(FIELD_WIDTH * 5 - 22, FIELD_HEIGHT * 8);
+			write_timer(0, BOARD_HEIGHT * 8);
+			write_flag_count(BOARD_WIDTH * 5 - 22, BOARD_HEIGHT * 8);
 			nokia_lcd_render();
 		}
 	}
@@ -174,45 +174,45 @@ void handle_movement()
 {
 	if (UP)
 	{
-		sel_y = move_overflowing(sel_y, 0, -1);
+		sel_y = move_wrapping(sel_y, 0, -1);
 	}
 	else if (DOWN)
 	{
-		sel_y = move_overflowing(sel_y, 0, 1);
+		sel_y = move_wrapping(sel_y, 0, 1);
 	}
 	else if (LEFT)
 	{
-		sel_x = move_overflowing(sel_x, 1, -1);
+		sel_x = move_wrapping(sel_x, 1, -1);
 	}
 	else if (RIGHT)
 	{
-		sel_x = move_overflowing(sel_x, 1, 1);
+		sel_x = move_wrapping(sel_x, 1, 1);
 	}
 }
 
 /**
  * Move the cursor alongside the x or y axis,
- * overflowing from one border to the other if necessary.
+ * wrapping from one screen border to the other if necessary.
  */
-int move_overflowing(uint8_t sel, int x, int amount)
+int move_wrapping(uint8_t sel, int x, int amount)
 {
 	if (amount < 0 && sel < abs(amount))
 	{
-		return x ? FIELD_WIDTH - 1 : FIELD_HEIGHT - 1;
+		return x ? BOARD_WIDTH - 1 : BOARD_HEIGHT - 1;
 	}
 
 	sel += amount;
 
 	if (x)
 	{
-		if (sel >= FIELD_WIDTH)
+		if (sel >= BOARD_WIDTH)
 		{
 			return 0;
 		}
 	}
 	else
 	{
-		if (sel >= FIELD_HEIGHT)
+		if (sel >= BOARD_HEIGHT)
 		{
 			return 0;
 		}
@@ -222,14 +222,14 @@ int move_overflowing(uint8_t sel, int x, int amount)
 }
 
 /*
- * Resets the field and the view to its initial state.
+ * Resets the board to its initial state.
  * Mines are then regenerated.
  */
 void reset_board()
 {
-	for (int i = 0; i < FIELD_HEIGHT; i++)
+	for (int i = 0; i < BOARD_HEIGHT; i++)
 	{
-		for (int j = 0; j < FIELD_WIDTH; j++)
+		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
 			board[i][j] = (Field) {0, 0, 0};
 		}
@@ -243,9 +243,9 @@ void reset_board()
  */
 void reveal_board()
 {
-	for (int i = 0; i < FIELD_HEIGHT; i++)
+	for (int i = 0; i < BOARD_HEIGHT; i++)
 	{
-		for (int j = 0; j < FIELD_WIDTH; j++)
+		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
 			board[i][j].revealed = 1;
 		}
@@ -253,14 +253,14 @@ void reveal_board()
 }
 
 /*
- * Fill the field with mines.
+ * Fill the board with mines.
  */
 void generate_mines()
 {
 	for (int mines = 0; mines < MINE_AMOUNT;)
 	{
-		int i = rand() % FIELD_HEIGHT;
-		int j = rand() % FIELD_WIDTH;
+		int i = rand() % BOARD_HEIGHT;
+		int j = rand() % BOARD_WIDTH;
 
 		if (!board[i][j].mine)
 		{
@@ -271,16 +271,16 @@ void generate_mines()
 }
 
 /**
- * Write the minefield matrix to the screen.
+ * Write the board to the screen.
  */
 void write_board()
 {
-	for (int i = 0; i < FIELD_HEIGHT; i++)
+	for (int i = 0; i < BOARD_HEIGHT; i++)
 	{
 		// Set the cursor to the start of the line.
 		nokia_lcd_set_cursor(0, i * 8);
 
-		for (int j = 0; j < FIELD_WIDTH; j++)
+		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
 			if (i == sel_y && j == sel_x && !lost)
 			{
