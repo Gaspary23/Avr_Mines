@@ -63,7 +63,6 @@ uint8_t sel_x = 0;
 uint8_t sel_y = 0;
 State game_state = MENU;
 int min, sec = 0;
-int seed = 0;
 int num_flags = 0;
 
 void reveal_board();
@@ -83,9 +82,12 @@ void write_victory();
 int main()
 {
 	setup();
+	int seed;
 
 	while (1)
 	{
+		seed = 0;
+
 		while (game_state == MENU)
 		{
 			nokia_lcd_clear();
