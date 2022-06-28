@@ -497,7 +497,7 @@ void setup()
 
 	nokia_lcd_init();
 	nokia_lcd_custom(1, CLOCK_GLYPH);
-	nokia_lcd_custom(2, SPACE_GLYPH);
+	nokia_lcd_custom(2, UNREVEALED_GLYPH);
 	nokia_lcd_custom(3, SELECTED_GLYPH);
 	nokia_lcd_custom(4, FLAG_GLYPH);
 	nokia_lcd_custom(5, MINE_GLYPH);
