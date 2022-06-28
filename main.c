@@ -73,6 +73,7 @@ void reveal_board();
 void generate_mines();
 void handle_buttons(Field *sel_field);
 void handle_movement();
+void increment_neighbours(int i, int j);
 int move_wrapping(uint8_t sel, int x, int amount);
 void reset_board();
 void setup();
@@ -82,7 +83,6 @@ void write_flag_count(uint8_t x, uint8_t y);
 void write_menu();
 void write_timer(uint8_t x, uint8_t y);
 void write_victory();
-void increment_neighbours(int i, int j);
 
 int main()
 {
@@ -127,7 +127,8 @@ int main()
 			write_victory();
 		}
 
-		while (game_state != MENU) {
+		while (game_state != MENU)
+		{
 			nokia_lcd_render();
 		}
 	}
@@ -308,7 +309,8 @@ void generate_mines()
 
 	for (int i=0; i < BOARD_HEIGHT; i++)
 	{
-		for (int j = 0; j < BOARD_WIDTH; j++) {
+		for (int j = 0; j < BOARD_WIDTH; j++)
+		{
 			float rand_res = (float) rand() / (float) RAND_MAX;
 
 			if (fields_left * rand_res < MINE_AMOUNT - mines_generated)
@@ -336,9 +338,12 @@ void generate_mines()
 /*
  * Count number of neigbour mines
  */
-void increment_neighbours(int i, int j) {
-	for (int x = -1; x <= 1; x++) {
-		for (int y = -1; y <= 1; y++) {
+void increment_neighbours(int i, int j)
+{
+	for (int x = -1; x <= 1; x++)
+	{
+		for (int y = -1; y <= 1; y++)
+		{
 			int a = i+x;
 			int b = j+y;
 			if (
