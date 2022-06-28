@@ -171,6 +171,7 @@ void handle_buttons(Field *sel_field)
 		else if (game_state == START || game_state == PLAYING)
 		{
 			sel_field->revealed = 1;
+			game_state = PLAYING;
 
 			if (sel_field->mine)
 			{
