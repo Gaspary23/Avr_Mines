@@ -1,6 +1,9 @@
+#ifndef MINES_CHARS
+#define MINES_CHARS
+
 #include <stdint.h>
 
-const uint8_t CLOCK_GLYPH[] = {
+static const uint8_t CLOCK_GLYPH[] = {
 	0b0111110,
 	0b1100011,
 	0b1001101,
@@ -8,7 +11,7 @@ const uint8_t CLOCK_GLYPH[] = {
 	0b0111110
 };
 
-const uint8_t FLAG_GLYPH[] = {
+static const uint8_t FLAG_GLYPH[] = {
 	0b0000000,
 	0b1111111,
 	0b0011111,
@@ -16,7 +19,7 @@ const uint8_t FLAG_GLYPH[] = {
 	0b0000100
 };
 
-const uint8_t MINE_GLYPH[] = {
+static const uint8_t MINE_GLYPH[] = {
 	0b0101010,
 	0b011100,
 	0b111110,
@@ -24,7 +27,7 @@ const uint8_t MINE_GLYPH[] = {
 	0b101010
 };
 
-const uint8_t UNREVEALED_GLYPH[] = {
+static const uint8_t UNREVEALED_GLYPH[] = {
 	0b000000,
 	0b011100,
 	0b011100,
@@ -32,10 +35,12 @@ const uint8_t UNREVEALED_GLYPH[] = {
 	0b000000
 };
 
-const uint8_t SELECTED_GLYPH[] = {
+static const uint8_t SELECTED_GLYPH[] = {
 	0b111110,
 	0b111110,
 	0b111110,
 	0b111110,
 	0b111110
 };
+
+#endif
