@@ -17,13 +17,9 @@
 #include "nokia5110.h"
 #include "usart.h"
 
-#define TIMER_CLK F_CPU / 1024
-// Update the timer once per second.
-#define TIMER_FREQ 1
 // Specify the board's dimensions in lines and columns.
 #define BOARD_WIDTH 14
 #define BOARD_HEIGHT 5
-#define MINE_AMOUNT 14
 #define UP PIND &(1 << PD1)
 #define LEFT PIND &(1 << PD2)
 #define DOWN PIND &(1 << PD3)
@@ -59,15 +55,23 @@ typedef enum state
 }
 State;
 
-Field board[BOARD_HEIGHT][BOARD_WIDTH];
-uint8_t sel_x = 0;
-uint8_t sel_y = 0;
+const int MINE_AMOUNT = 14;
+const int TIMER_CLK = F_CPU / 1024;
+// Update the timer once per second.
+const int TIMER_FREQ = 1;
+
+static State g_game_state = MENU;
+static Field g_board[BOARD_HEIGHT][BOARD_WIDTH];
 // This is the amount of empty fields left to be revealed
 // until victory is achieved.
-int empty_left = BOARD_HEIGHT * BOARD_WIDTH - MINE_AMOUNT;
-State game_state = MENU;
-int min, sec = 0;
-int num_flags = 0;
+static int g_fields_left = BOARD_HEIGHT * BOARD_WIDTH - MINE_AMOUNT;
+static int g_flags_placed = 0;
+// Store the coordinates of the currently selected field.
+static uint8_t g_sel_x = 0;
+static uint8_t g_sel_y = 0;
+// Track elapsed time.
+static int g_min = 0;
+static int g_sec = 0;
 
 void reveal_board();
 void generate_mines();
@@ -93,7 +97,7 @@ int main()
 	{
 		seed = 0;
 
-		while (game_state == MENU)
+		while (g_game_state == MENU)
 		{
 			nokia_lcd_clear();
 			write_menu();
@@ -105,7 +109,7 @@ int main()
 		srand(seed);
 		reset_board();
 
-		while (game_state == START || game_state == PLAYING)
+		while (g_game_state == START || g_game_state == PLAYING)
 		{
 			nokia_lcd_clear();
 			write_board();
@@ -118,7 +122,7 @@ int main()
 		reveal_board();
 		write_board();
 
-		if (game_state == DEFEAT)
+		if (g_game_state == DEFEAT)
 		{
 			write_defeat();
 		}
@@ -127,7 +131,7 @@ int main()
 			write_victory();
 		}
 
-		while (game_state != MENU)
+		while (g_game_state != MENU)
 		{
 			nokia_lcd_render();
 		}
@@ -139,14 +143,14 @@ int main()
  */
 ISR(TIMER1_COMPA_vect)
 {
-	if (game_state == PLAYING)
+	if (g_game_state == PLAYING)
 	{
-		sec++;
+		g_sec++;
 
-		if (sec >= 60)
+		if (g_sec >= 60)
 		{
-			sec = 0;
-			min++;
+			g_sec = 0;
+			g_min++;
 		}
 	}
 }
@@ -156,59 +160,59 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(PCINT2_vect)
 {
-	if (game_state == START || game_state == PLAYING)
+	if (g_game_state == START || g_game_state == PLAYING)
 	{
 		handle_movement();
 	}
 
-	handle_buttons(&board[sel_y][sel_x]);
+	handle_buttons(&g_board[g_sel_y][g_sel_x]);
 }
 
 void handle_buttons(Field *sel_field)
 {
 	if (CHECK)
 	{
-		if (game_state == MENU)
+		if (g_game_state == MENU)
 		{
-			sec = 0;
-			min = 0;
-			game_state = START;
+			g_sec = 0;
+			g_min = 0;
+			g_game_state = START;
 		}
-		else if (game_state == START || game_state == PLAYING)
+		else if (g_game_state == START || g_game_state == PLAYING)
 		{
 			sel_field->revealed = 1;
-			game_state=PLAYING;
+			g_game_state=PLAYING;
 
 			if (sel_field->mine)
 			{
-				game_state = DEFEAT;
+				g_game_state = DEFEAT;
 			}
 			else
 			{
-				num_flags = sel_field->flagged ? num_flags - 1 : num_flags;
+				g_flags_placed = sel_field->flagged ? g_flags_placed - 1 : g_flags_placed;
 				sel_field->flagged = 0;
-				empty_left--;
+				g_fields_left--;
 
-				if (empty_left == 0)
+				if (g_fields_left == 0)
 				{
-					game_state = VICTORY;
+					g_game_state = VICTORY;
 				}
 			}
 		}
 	}
 	else if (FLAG)
 	{
-		if (game_state == DEFEAT || game_state == VICTORY)
+		if (g_game_state == DEFEAT || g_game_state == VICTORY)
 		{
-			game_state = MENU;
-			sel_y = 0;
-			sel_x = 0;
-			num_flags = 0;
+			g_game_state = MENU;
+			g_sel_y = 0;
+			g_sel_x = 0;
+			g_flags_placed = 0;
 		}
 		else if (!sel_field->revealed)
 		{
 			sel_field->flagged ^= 1;
-			num_flags = sel_field->flagged ? num_flags + 1 : num_flags - 1;
+			g_flags_placed = sel_field->flagged ? g_flags_placed + 1 : g_flags_placed - 1;
 		}
 	}
 }
@@ -217,19 +221,19 @@ void handle_movement()
 {
 	if (UP)
 	{
-		sel_y = move_wrapping(sel_y, 0, -1);
+		g_sel_y = move_wrapping(g_sel_y, 0, -1);
 	}
 	else if (DOWN)
 	{
-		sel_y = move_wrapping(sel_y, 0, 1);
+		g_sel_y = move_wrapping(g_sel_y, 0, 1);
 	}
 	else if (LEFT)
 	{
-		sel_x = move_wrapping(sel_x, 1, -1);
+		g_sel_x = move_wrapping(g_sel_x, 1, -1);
 	}
 	else if (RIGHT)
 	{
-		sel_x = move_wrapping(sel_x, 1, 1);
+		g_sel_x = move_wrapping(g_sel_x, 1, 1);
 	}
 }
 
@@ -274,7 +278,7 @@ void reset_board()
 	{
 		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
-			board[i][j] = (Field) {0, 0, 0, 0};
+			g_board[i][j] = (Field) {0, 0, 0, 0};
 		}
 	}
 
@@ -290,7 +294,7 @@ void reveal_board()
 	{
 		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
-			board[i][j].revealed = 1;
+			g_board[i][j].revealed = 1;
 		}
 	}
 }
@@ -315,7 +319,7 @@ void generate_mines()
 
 			if (fields_left * rand_res < MINE_AMOUNT - mines_generated)
 			{
-				board[i][j].mine = 1;
+				g_board[i][j].mine = 1;
 				mines_generated++;
 				increment_neighbours(i,j);
 
@@ -352,7 +356,7 @@ void increment_neighbours(int i, int j)
 				b >= 0 &&
 				b < BOARD_WIDTH
 			) {
-				board[i+x][j+y].num_mines++;
+				g_board[i+x][j+y].num_mines++;
 			}
 		}
 	}
@@ -371,14 +375,14 @@ void write_board()
 		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
 			if (
-				i == sel_y && j == sel_x
-				&& (game_state == START || game_state == PLAYING)
+				i == g_sel_y && j == g_sel_x
+				&& (g_game_state == START || g_game_state == PLAYING)
 			) {
 				nokia_lcd_write_string("\003", 1);
 				continue;
 			}
 
-			Field field = board[i][j];
+			Field field = g_board[i][j];
 
 			if (!field.revealed)
 			{
@@ -415,7 +419,7 @@ void write_board()
 void write_flag_count(uint8_t x, uint8_t y)
 {
 	char flags[7];
-	sprintf(flags, "%02d/%02d\004", num_flags, MINE_AMOUNT);
+	sprintf(flags, "%02d/%02d\004", g_flags_placed, MINE_AMOUNT);
 	nokia_lcd_set_cursor(x, y);
 	nokia_lcd_write_string(flags, 1);
 }
@@ -426,7 +430,7 @@ void write_flag_count(uint8_t x, uint8_t y)
 void write_timer(uint8_t x, uint8_t y)
 {
 	char time_display[7];
-	sprintf(time_display, "\001%02d:%02d", min, sec);
+	sprintf(time_display, "\001%02d:%02d", g_min, g_sec);
 	nokia_lcd_set_cursor(x, y);
 	nokia_lcd_write_string(time_display, 1);
 }
