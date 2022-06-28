@@ -36,9 +36,10 @@
  */
 typedef struct field
 {
-	int mine;
-	int flagged;
-	int revealed;
+	unsigned char mine;
+	unsigned char flagged;
+	unsigned char revealed;
+	unsigned char num_mines;
 }
 Field;
 
@@ -61,6 +62,9 @@ State;
 Field board[BOARD_HEIGHT][BOARD_WIDTH];
 uint8_t sel_x = 0;
 uint8_t sel_y = 0;
+// This is the amount of empty fields left to be revealed
+// until victory is achieved.
+int empty_left = BOARD_HEIGHT * BOARD_WIDTH - MINE_AMOUNT;
 State game_state = MENU;
 int min, sec = 0;
 int num_flags = 0;
@@ -78,6 +82,7 @@ void write_flag_count(uint8_t x, uint8_t y);
 void write_menu();
 void write_timer(uint8_t x, uint8_t y);
 void write_victory();
+void increment_neighbours(int i, int j);
 
 int main()
 {
@@ -171,6 +176,7 @@ void handle_buttons(Field *sel_field)
 		else if (game_state == START || game_state == PLAYING)
 		{
 			sel_field->revealed = 1;
+			game_state=PLAYING;
 
 			if (sel_field->mine)
 			{
@@ -180,6 +186,12 @@ void handle_buttons(Field *sel_field)
 			{
 				num_flags = sel_field->flagged ? num_flags - 1 : num_flags;
 				sel_field->flagged = 0;
+				empty_left--;
+
+				if (empty_left == 0)
+				{
+					game_state = VICTORY;
+				}
 			}
 		}
 	}
@@ -261,7 +273,7 @@ void reset_board()
 	{
 		for (int j = 0; j < BOARD_WIDTH; j++)
 		{
-			board[i][j] = (Field) {0, 0, 0};
+			board[i][j] = (Field) {0, 0, 0, 0};
 		}
 	}
 
@@ -295,7 +307,28 @@ void generate_mines()
 		if (!board[i][j].mine)
 		{
 			board[i][j].mine = 1;
+			increment_neighbours(i,j);
 			mines++;
+		}
+	}
+}
+
+/*
+ * Count number of neigbour mines
+ */
+void increment_neighbours(int i, int j) {
+	for (int x = -1; x <= 1; x++) {
+		for (int y = -1; y <= 1; y++) {
+			int a = i+x;
+			int b = j+y;
+			if (
+				a >= 0 &&
+				a < BOARD_HEIGHT && 
+				b >= 0 &&
+				b < BOARD_WIDTH
+			) {
+				board[i+x][j+y].num_mines++;
+			}
 		}
 	}
 }
@@ -339,8 +372,13 @@ void write_board()
 			}
 			else
 			{
-				// TODO: write number of neighbouring bombs.
-				nokia_lcd_write_string(" ", 1);
+				if (field.num_mines > 0) {
+					char value[3];
+					sprintf(value, "%d", field.num_mines);
+					nokia_lcd_write_string(value, 1);				
+				} else {
+					nokia_lcd_write_string(" ", 1);
+				}
 			}
 		}
 	}
