@@ -56,12 +56,10 @@ int main()
 	setup();
 	int seed;
 
-	while (1)
-	{
+	while (1) {
 		seed = 0;
 
-		while (g_game_state == MENU)
-		{
+		while (g_game_state == MENU) {
 			nokia_lcd_clear();
 			write_menu();
 			// Obtain a random seed from the time taken to start gameplay.
@@ -72,8 +70,7 @@ int main()
 		srand(seed);
 		reset_board(BOARD_WIDTH, BOARD_HEIGHT, g_board, MINE_AMOUNT);
 
-		while (g_game_state == START || g_game_state == PLAYING)
-		{
+		while (g_game_state == START || g_game_state == PLAYING) {
 			nokia_lcd_clear();
 
 			write_board(
@@ -99,17 +96,13 @@ int main()
 			g_sel_x, g_sel_y, g_game_state
 		);
 
-		if (g_game_state == DEFEAT)
-		{
+		if (g_game_state == DEFEAT) {
 			write_defeat(0, BOARD_HEIGHT * 8);
-		}
-		else
-		{
+		} else {
 			write_victory(0, BOARD_HEIGHT * 8);
 		}
 
-		while (g_game_state != MENU)
-		{
+		while (g_game_state != MENU) {
 			nokia_lcd_render();
 		}
 	}
@@ -120,12 +113,10 @@ int main()
  */
 ISR(TIMER1_COMPA_vect)
 {
-	if (g_game_state == PLAYING)
-	{
+	if (g_game_state == PLAYING) {
 		g_sec++;
 
-		if (g_sec >= 60)
-		{
+		if (g_sec >= 60) {
 			g_sec = 0;
 			g_min++;
 		}
@@ -137,8 +128,7 @@ ISR(TIMER1_COMPA_vect)
  */
 ISR(PCINT2_vect)
 {
-	if (g_game_state == START || g_game_state == PLAYING)
-	{
+	if (g_game_state == START || g_game_state == PLAYING) {
 		handle_movement();
 	}
 
