@@ -62,6 +62,9 @@ State;
 Field board[BOARD_HEIGHT][BOARD_WIDTH];
 uint8_t sel_x = 0;
 uint8_t sel_y = 0;
+// This is the amount of empty fields left to be revealed
+// until victory is achieved.
+int empty_left = BOARD_HEIGHT * BOARD_WIDTH - MINE_AMOUNT;
 State game_state = MENU;
 int min, sec = 0;
 int num_flags = 0;
@@ -183,6 +186,12 @@ void handle_buttons(Field *sel_field)
 			{
 				num_flags = sel_field->flagged ? num_flags - 1 : num_flags;
 				sel_field->flagged = 0;
+				empty_left--;
+
+				if (empty_left == 0)
+				{
+					game_state = VICTORY;
+				}
 			}
 		}
 	}
