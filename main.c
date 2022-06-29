@@ -162,16 +162,21 @@ void handle_buttons(Field *sel_field)
 		}
 
 		if (g_game_state == PLAYING) {
-			sel_field->revealed = 1;
-
 			if (sel_field->mine) {
+				sel_field->revealed = 1;
 				g_game_state = DEFEAT;
 			} else {
-				g_flags_placed = sel_field->flagged ?
-					g_flags_placed - 1 : g_flags_placed;
+				int fields_revealed = 0;
+				int flags_removed = 0;
 
-				sel_field->flagged = 0;
-				g_fields_left--;
+				reveal_section(
+					&fields_revealed, &flags_removed,
+					g_sel_y, g_sel_x, BOARD_WIDTH, BOARD_HEIGHT,
+					g_board
+				);
+
+				g_fields_left -= fields_revealed;
+				g_flags_placed -= flags_removed;
 
 				if (g_fields_left == 0) {
 					g_game_state = VICTORY;

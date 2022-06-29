@@ -4,6 +4,16 @@
 #include "board.h"
 
 /*
+ * Use this structure to queue fields when
+ * performing BFS on the field graph.
+ */
+typedef struct queued_field {
+	uint8_t row;
+	uint8_t col;
+	struct queued_field *next;
+} QueuedField;
+
+/*
  * Resets the board to its initial state.
  * Mines are then regenerated.
  */
@@ -74,6 +84,67 @@ void generate_mines(
 			break;
 		}
 	}
+}
+
+/*
+ * Reveal a field and then from there,
+ * all adjacent fields that can be revealed.
+ */
+void reveal_section(
+	int *fields_revealed, int *flags_removed,
+	uint8_t row_orig, uint8_t col_orig,
+	uint8_t board_width, uint8_t board_height,
+	Field board[board_height][board_width]
+) {
+	QueuedField u = (QueuedField) { row_orig, col_orig, NULL };
+	board[row_orig][col_orig].revealed = 1;
+
+	(*fields_revealed)++;
+
+	if (board[row_orig][col_orig].flagged) {
+		board[row_orig][col_orig].flagged = 0;
+		(*flags_removed)++;
+	}
+
+	do {
+		for (int dy = -1; dy <= 1; dy++) {
+			for (int dx = -1; dx <= 1; dx++) {
+				int row = u.row + dy;
+				int col = u.col + dx;
+
+				if (
+					row >= 0 && row < board_height &&
+					col >= 0 && col < board_width &&
+					!board[row][col].revealed &&
+					!board[row][col].mine
+				) {
+					board[row][col].revealed = 1;
+					(*fields_revealed)++;
+
+					if (board[row][col].flagged) {
+						board[row][col].flagged = 0;
+						(*flags_removed)++;
+					}
+
+					if (board[row][col].num_mines) {
+						continue;
+					}
+
+					QueuedField tail = u;
+
+					while (tail.next) {
+						tail = *tail.next;
+					}
+
+					tail.next = &(QueuedField) { row, col, NULL };
+				}
+			}
+		}
+
+		if (u.next) {
+			u = *u.next;
+		}
+	} while(u.next);
 }
 
 /*

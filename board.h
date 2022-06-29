@@ -48,6 +48,13 @@ void generate_mines(
 	uint8_t amount
 );
 
+void reveal_section(
+	int *fields_revealed, int *flags_removed,
+	uint8_t row_orig, uint8_t col_orig,
+	uint8_t board_width, uint8_t board_height,
+	Field board[board_height][board_width]
+);
+
 void increment_neighbours(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
