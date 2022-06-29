@@ -21,26 +21,26 @@ static const uint8_t FLAG_GLYPH[] = {
 
 static const uint8_t MINE_GLYPH[] = {
 	0b0101010,
-	0b011100,
-	0b111110,
-	0b011100,
-	0b101010
+	0b0011100,
+	0b0111110,
+	0b0011100,
+	0b0101010
 };
 
 static const uint8_t UNREVEALED_GLYPH[] = {
-	0b000000,
-	0b011100,
-	0b011100,
-	0b011100,
-	0b000000
+	0b0000000,
+	0b0000000,
+	0b0001000,
+	0b0000000,
+	0b0000000
 };
 
 static const uint8_t SELECTED_GLYPH[] = {
-	0b111110,
-	0b111110,
-	0b111110,
-	0b111110,
-	0b111110
+	0b1111111,
+	0b1111111,
+	0b1111111,
+	0b1111111,
+	0b1111111
 };
 
 #endif
