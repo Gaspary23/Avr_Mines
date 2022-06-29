@@ -58,13 +58,7 @@ void reveal_section(
 void increment_neighbours(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
-	uint8_t row_center, uint8_t col_center
-);
-
-void decrement_neighbours(
-	uint8_t board_width, uint8_t board_height,
-	Field board[board_height][board_width],
-	uint8_t row_center, uint8_t col_center
+	uint8_t row_center, uint8_t col_center, uint8_t increment
 );
 
 int move_mine(

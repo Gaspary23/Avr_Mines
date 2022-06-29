@@ -79,6 +79,7 @@ int main()
 		while (g_game_state == START || g_game_state == PLAYING) {
 			nokia_lcd_clear();
 
+			reveal_board(BOARD_WIDTH, BOARD_HEIGHT, g_board);
 			write_board(
 				BOARD_WIDTH, BOARD_HEIGHT, g_board,
 				g_sel_x, g_sel_y, g_game_state
