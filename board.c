@@ -12,9 +12,9 @@ void reset_board(
 	Field board[board_height][board_width],
 	uint8_t mine_amount
 ) {
-	for (int i = 0; i < board_height; i++) {
-		for (int j = 0; j < board_width; j++) {
-			board[i][j] = (Field) {0, 0, 0, 0};
+	for (int row = 0; row < board_height; row++) {
+		for (int col = 0; col < board_width; col++) {
+			board[row][col] = (Field) {0, 0, 0, 0};
 		}
 	}
 
@@ -28,9 +28,9 @@ void reveal_board(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width]
 ) {
-	for (int i = 0; i < board_height; i++) {
-		for (int j = 0; j < board_width; j++) {
-			board[i][j].revealed = 1;
+	for (int row = 0; row < board_height; row++) {
+		for (int col = 0; col < board_width; col++) {
+			board[row][col].revealed = 1;
 		}
 	}
 }
@@ -50,14 +50,17 @@ void generate_mines(
 	int mines_generated = 0;
 	int fields_left = board_height * board_width - 1;
 
-	for (int i=0; i < board_height; i++) {
-		for (int j = 0; j < board_width; j++) {
+	for (int row = 0; row < board_height; row++) {
+		for (int col = 0; col < board_width; col++) {
 			float rand_res = (float) rand() / (float) RAND_MAX;
 
 			if (fields_left * rand_res < amount - mines_generated) {
-				board[i][j].mine = 1;
+				board[row][col].mine = 1;
 				mines_generated++;
-				increment_neighbours(board_width, board_height, board, i, j);
+
+				increment_neighbours(
+					board_width, board_height, board, row, col
+				);
 
 				if (mines_generated == amount) {
 					break;
@@ -74,23 +77,80 @@ void generate_mines(
 }
 
 /*
- * Count the number of neigbouring mines.
+ * Move a mine from one field to another.
+ */
+int move_mine(
+	uint8_t row_orig, uint8_t col_orig, uint8_t row_dest, uint8_t col_dest,
+	uint8_t board_width, uint8_t board_height,
+	Field board[board_height][board_width]
+) {
+	Field *orig = &board[row_orig][col_orig];
+	Field *dest = &board[row_dest][col_dest];
+
+	if (!orig->mine || dest->mine) {
+		return 0;
+	}
+
+	orig->mine = 0;
+
+	decrement_neighbours(
+		board_width, board_height, board, row_orig, col_orig
+	);
+
+	dest->mine = 1;
+
+	increment_neighbours(
+		board_width, board_height, board, row_dest, col_dest
+	);
+
+	return 1;
+}
+
+/*
+ * Assuming the field at i, j is a mine,
+ * increments the neigbouring mines counter
+ * for every neighbour field.
  */
 void increment_neighbours(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
-	uint8_t i, uint8_t j
+	uint8_t row_center, uint8_t col_center
 ) {
-	for (int row = -1; row <= 1; row++) {
-		for (int col = -1; col <= 1; col++) {
-			int dy = i + row;
-			int dx = j + col;
+	for (int dy = -1; dy <= 1; dy++) {
+		for (int dx = -1; dx <= 1; dx++) {
+			int row = row_center + dy;
+			int col = col_center + dx;
 
 			if (
-				dy >= 0 && dy < board_height &&
-				dx >= 0 && dx < board_width
+				row >= 0 && row < board_height &&
+				col >= 0 && col < board_width
 			) {
-				board[dy][dx].num_mines++;
+				board[row][col].num_mines++;
+			}
+		}
+	}
+}
+
+/*
+ * Assuming the field at i, j is no longer a mine,
+ * decrements the neigbouring mines counter
+ * for every neighbour field.
+ */
+void decrement_neighbours(
+	uint8_t board_width, uint8_t board_height,
+	Field board[board_height][board_width],
+	uint8_t row_center, uint8_t col_center
+) {
+	for (int dy = -1; dy <= 1; dy++) {
+		for (int dx = -1; dx <= 1; dx++) {
+			int row = row_center + dy;
+			int col = col_center + dx;
+
+			if (
+				row >= 0 && row < board_height &&
+				col >= 0 && col < board_width
+			) {
+				board[row][col].num_mines--;
 			}
 		}
 	}

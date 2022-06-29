@@ -51,7 +51,19 @@ void generate_mines(
 void increment_neighbours(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
-	uint8_t i, uint8_t j
+	uint8_t row_center, uint8_t col_center
+);
+
+void decrement_neighbours(
+	uint8_t board_width, uint8_t board_height,
+	Field board[board_height][board_width],
+	uint8_t row_center, uint8_t col_center
+);
+
+int move_mine(
+	uint8_t row_orig, uint8_t col_orig, uint8_t row_dest, uint8_t col_dest,
+	uint8_t board_width, uint8_t board_height,
+	Field board[board_height][board_width]
 );
 
 int move_wrapping(uint8_t sel, int amount, uint8_t limit);

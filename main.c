@@ -38,7 +38,7 @@ static State g_game_state = MENU;
 static Field g_board[BOARD_HEIGHT][BOARD_WIDTH];
 // This is the amount of empty fields left to be revealed
 // until victory is achieved.
-static int g_fields_left = BOARD_HEIGHT * BOARD_WIDTH - MINE_AMOUNT;
+static int g_fields_left;
 static int g_flags_placed = 0;
 // Store the coordinates of the currently selected field.
 static uint8_t g_sel_x = 0;
@@ -67,6 +67,12 @@ int main()
 			nokia_lcd_render();
 		}
 
+		g_sec = 0;
+		g_min = 0;
+		g_sel_x = 0;
+		g_sel_y = 0;
+		g_flags_placed = 0;
+		g_fields_left = BOARD_HEIGHT * BOARD_WIDTH - MINE_AMOUNT;
 		srand(seed);
 		reset_board(BOARD_WIDTH, BOARD_HEIGHT, g_board, MINE_AMOUNT);
 
@@ -139,17 +145,31 @@ void handle_buttons(Field *sel_field)
 {
 	if (CHECK) {
 		if (g_game_state == MENU) {
-			g_sec = 0;
-			g_min = 0;
 			g_game_state = START;
-		} else if (g_game_state == START || g_game_state == PLAYING) {
+			return;
+		}
+
+		if (g_game_state == START) {
+			g_game_state = PLAYING;
+
+			if (sel_field->mine) {
+				move_mine(
+					g_sel_y, g_sel_x, BOARD_HEIGHT - 1, BOARD_WIDTH - 1,
+					BOARD_WIDTH, BOARD_HEIGHT,
+					g_board
+				);
+			}
+		}
+
+		if (g_game_state == PLAYING) {
 			sel_field->revealed = 1;
-			g_game_state=PLAYING;
 
 			if (sel_field->mine) {
 				g_game_state = DEFEAT;
 			} else {
-				g_flags_placed = sel_field->flagged ? g_flags_placed - 1 : g_flags_placed;
+				g_flags_placed = sel_field->flagged ?
+					g_flags_placed - 1 : g_flags_placed;
+
 				sel_field->flagged = 0;
 				g_fields_left--;
 
@@ -161,12 +181,11 @@ void handle_buttons(Field *sel_field)
 	} else if (FLAG) {
 		if (g_game_state == DEFEAT || g_game_state == VICTORY) {
 			g_game_state = MENU;
-			g_sel_y = 0;
-			g_sel_x = 0;
-			g_flags_placed = 0;
 		} else if (!sel_field->revealed) {
 			sel_field->flagged ^= 1;
-			g_flags_placed = sel_field->flagged ? g_flags_placed + 1 : g_flags_placed - 1;
+
+			g_flags_placed = sel_field->flagged ?
+				g_flags_placed + 1 : g_flags_placed - 1;
 		}
 	}
 }
