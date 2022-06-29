@@ -16,11 +16,11 @@ void write_board(
 	uint8_t sel_x, uint8_t sel_y,
 	State game_state
 ) {
-	for (int row = 0; row < board_height; row++) {
+	for (uint8_t row = 0; row < board_height; row++) {
 		// Set the cursor to the start of the line.
 		nokia_lcd_set_cursor(0, row * 8);
 
-		for (int col = 0; col < board_width; col++) {
+		for (uint8_t col = 0; col < board_width; col++) {
 			if (
 				row == sel_y && col == sel_x
 				&& (game_state == START || game_state == PLAYING)
