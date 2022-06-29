@@ -166,6 +166,10 @@ void handle_buttons(Field *sel_field)
 				sel_field->revealed = 1;
 				g_game_state = DEFEAT;
 			} else {
+				if (sel_field->revealed) {
+					return;
+				}
+
 				int fields_revealed = 0;
 				int flags_removed = 0;
 
