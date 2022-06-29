@@ -29,7 +29,7 @@
 #define FLAG PIND &(1 << PD6)
 #define CHECK PIND &(1 << PD7)
 
-const int MINE_AMOUNT = 14;
+const int8_t MINE_AMOUNT = 14;
 const int TIMER_CLK = F_CPU / 1024;
 // Update the timer once per second.
 const int TIMER_FREQ = 1;
@@ -38,14 +38,14 @@ static State g_game_state = MENU;
 static Field g_board[BOARD_HEIGHT][BOARD_WIDTH];
 // This is the amount of empty fields left to be revealed
 // until victory is achieved.
-static int g_fields_left;
-static int g_flags_placed = 0;
+static int8_t g_fields_left;
+static int8_t g_flags_placed = 0;
 // Store the coordinates of the currently selected field.
 static uint8_t g_sel_x = 0;
 static uint8_t g_sel_y = 0;
 // Track elapsed time.
-static int g_min = 0;
-static int g_sec = 0;
+static int8_t g_min = 0;
+static int8_t g_sec = 0;
 
 void handle_buttons(Field *sel_field);
 void handle_movement();
@@ -54,11 +54,9 @@ void setup();
 int main()
 {
 	setup();
-	int seed;
+	int seed = 0;
 
 	while (1) {
-		seed = 0;
-
 		while (g_game_state == MENU) {
 			nokia_lcd_clear();
 			write_menu();
@@ -170,8 +168,8 @@ void handle_buttons(Field *sel_field)
 					return;
 				}
 
-				int fields_revealed = 0;
-				int flags_removed = 0;
+				uint8_t fields_revealed = 0;
+				uint8_t flags_removed = 0;
 
 				reveal_section(
 					&fields_revealed, &flags_removed,

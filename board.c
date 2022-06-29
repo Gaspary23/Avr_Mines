@@ -5,16 +5,6 @@
 #include "usart.h"
 
 /*
- * Use this structure to queue fields when
- * performing BFS on the field graph.
- */
-typedef struct queued_field {
-	uint8_t row;
-	uint8_t col;
-	struct queued_field *next;
-} QueuedField;
-
-/*
  * Resets the board to its initial state.
  * Mines are then regenerated.
  */
@@ -23,8 +13,8 @@ void reset_board(
 	Field board[board_height][board_width],
 	uint8_t mine_amount
 ) {
-	for (int row = 0; row < board_height; row++) {
-		for (int col = 0; col < board_width; col++) {
+	for (uint8_t row = 0; row < board_height; row++) {
+		for (uint8_t col = 0; col < board_width; col++) {
 			board[row][col] = (Field) {0, 0, 0, 0};
 		}
 	}
@@ -39,8 +29,8 @@ void reveal_board(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width]
 ) {
-	for (int row = 0; row < board_height; row++) {
-		for (int col = 0; col < board_width; col++) {
+	for (uint8_t row = 0; row < board_height; row++) {
+		for (uint8_t col = 0; col < board_width; col++) {
 			board[row][col].revealed = 1;
 		}
 	}
@@ -61,8 +51,8 @@ void generate_mines(
 	int mines_generated = 0;
 	int fields_left = board_height * board_width - 1;
 
-	for (int row = 0; row < board_height; row++) {
-		for (int col = 0; col < board_width; col++) {
+	for (uint8_t row = 0; row < board_height; row++) {
+		for (uint8_t col = 0; col < board_width; col++) {
 			float rand_res = (float) rand() / (float) RAND_MAX;
 
 			if (fields_left * rand_res < amount - mines_generated) {
@@ -88,20 +78,17 @@ void generate_mines(
 }
 
 /*
- * Reveal a field and then from there,
- * all adjacent fields that can be revealed.
+ * Reveal a field and its neighbours, unless it has neigbouring mines.
+ * In that case, reveal the origin field only.
+ * It is assumed to be unrevealed and not a mine.
  */
 void reveal_section(
-	int *fields_revealed, int *flags_removed,
+	uint8_t *fields_revealed, uint8_t *flags_removed,
 	uint8_t row_orig, uint8_t col_orig,
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width]
 ) {
-	QueuedField *Q = &(QueuedField) { row_orig, col_orig, NULL };
-	// Keep track of the last element in the queue.
-	QueuedField *tail = Q->next;
-	Field *field = &board[Q->row][Q->col];
-	// Reveal the first field.
+	Field *field = &board[row_orig][col_orig];
 	field->revealed = 1;
 	(*fields_revealed)++;
 
@@ -110,51 +97,36 @@ void reveal_section(
 		(*flags_removed)++;
 	}
 
-	// If the first field has neigbouring mines, stop.
 	if (field->num_mines) {
 		return;
 	}
 
-	while(Q) {
-		// Obtain the adjacent fields.
-		for (int dy = -1; dy <= 1; dy++) {
-			for (int dx = -1; dx <= 1; dx++) {
-				int row = (int) Q->row + dy;
-				int col = (int) Q->col + dx;
+	for (int8_t dy = -1; dy <= 1; dy++) {
+		for (int8_t dx = -1; dx <= 1; dx++) {
+			int8_t row = row_orig + dy;
+			int8_t col = col_orig + dx;
 
-				if (
-					row < 0 || row >= board_height ||
-					col < 0 || col >= board_width
-				) {
-					continue;
-				}
+			if (
+				row < 0 || row >= board_height ||
+				col < 0 || col >= board_width
+			) {
+				continue;
+			}
 
-				field = &board[row][col];
+			field = &board[row][col];
 
-				if (field->revealed || field->mine) {
-					continue;
-				}
+			if (field->revealed) {
+				continue;
+			}
 
-				// Reveal this field.
-				field->revealed = 1;
-				(*fields_revealed)++;
+			field->revealed = 1;
+			(*fields_revealed)++;
 
-				if (field->flagged) {
-					field->flagged = 0;
-					(*flags_removed)++;
-				}
-
-				if (field->num_mines) {
-					continue;
-				}
-
-				// Add this field to the queue.
-				tail->next = &(QueuedField) { row, col, NULL };
-				tail = tail->next;
+			if (field->flagged) {
+				field->flagged = 0;
+				(*flags_removed)++;
 			}
 		}
-
-		Q = Q->next;
 	}
 }
 
@@ -198,10 +170,10 @@ void increment_neighbours(
 	Field board[board_height][board_width],
 	uint8_t row_center, uint8_t col_center, uint8_t increment
 ) {
-	for (int dy = -1; dy <= 1; dy++) {
-		for (int dx = -1; dx <= 1; dx++) {
-			int row = row_center + dy;
-			int col = col_center + dx;
+	for (int8_t dy = -1; dy <= 1; dy++) {
+		for (int8_t dx = -1; dx <= 1; dx++) {
+			int8_t row = row_center + dy;
+			int8_t col = col_center + dx;
 
 			if (
 				row >= 0 && row < board_height &&
@@ -217,7 +189,7 @@ void increment_neighbours(
  * Move the cursor alongside the x or y axis,
  * wrapping from one screen border to the other if necessary.
  */
-int move_wrapping(uint8_t sel, int amount, uint8_t limit) {
+int move_wrapping(uint8_t sel, int8_t amount, uint8_t limit) {
 	if (amount < 0 && sel < abs(amount)) {
 		return limit - 1;
 	}

@@ -49,7 +49,7 @@ void generate_mines(
 );
 
 void reveal_section(
-	int *fields_revealed, int *flags_removed,
+	uint8_t *fields_revealed, uint8_t *flags_removed,
 	uint8_t row_orig, uint8_t col_orig,
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width]
@@ -67,6 +67,6 @@ int move_mine(
 	Field board[board_height][board_width]
 );
 
-int move_wrapping(uint8_t sel, int amount, uint8_t limit);
+int move_wrapping(uint8_t sel, int8_t amount, uint8_t limit);
 
 #endif
