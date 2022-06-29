@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "board.h"
+#include "usart.h"
 
 /*
  * Use this structure to queue fields when
@@ -96,56 +97,60 @@ void reveal_section(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width]
 ) {
-	QueuedField u = (QueuedField) { row_orig, col_orig, NULL };
-	board[row_orig][col_orig].revealed = 1;
-
+	QueuedField *Q = &(QueuedField) { row_orig, col_orig, NULL };
+	// Keep track of the last element in the queue.
+	QueuedField *tail = Q->next;
+	Field *field = &board[Q->row][Q->col];
+	// Reveal the first field.
+	field->revealed = 1;
 	(*fields_revealed)++;
 
-	if (board[row_orig][col_orig].flagged) {
-		board[row_orig][col_orig].flagged = 0;
+	if (field->flagged) {
+		field->flagged = 0;
 		(*flags_removed)++;
 	}
 
-	if (!board[row_orig][col_orig].num_mines) {
-		do {
-			for (int dy = -1; dy <= 1; dy++) {
-				for (int dx = -1; dx <= 1; dx++) {
-					int row = u.row + dy;
-					int col = u.col + dx;
+	// If the first field has neigbouring mines, stop.
+	if (field->num_mines) {
+		return;
+	}
 
-					if (
-						row >= 0 && row < board_height &&
-						col >= 0 && col < board_width &&
-						!board[row][col].revealed &&
-						!board[row][col].mine
-					) {
-						board[row][col].revealed = 1;
-						(*fields_revealed)++;
+	while(Q) {
+		// Obtain the adjacent fields.
+		for (int dy = -1; dy <= 1; dy++) {
+			for (int dx = -1; dx <= 1; dx++) {
+				int row = (int) Q->row + dy;
+				int col = (int) Q->col + dx;
 
-						if (board[row][col].flagged) {
-							board[row][col].flagged = 0;
-							(*flags_removed)++;
-						}
-
-						if (board[row][col].num_mines) {
-							continue;
-						}
-
-						QueuedField tail = u;
-
-						while (tail.next) {
-							tail = *tail.next;
-						}
-
-						tail.next = &(QueuedField) { row, col, NULL };
-					}
+				if (
+					row < 0 || row >= board_height ||
+					col < 0 || col >= board_width
+				) {
+					continue;
 				}
-			}
 
-			if (u.next) {
-				u = *u.next;
+				field = &board[row][col];
+
+				if (field->revealed || field->mine) {
+					continue;
+				}
+
+				// Reveal this field.
+				field->revealed = 1;
+				(*fields_revealed)++;
+
+				if (field->flagged) {
+					field->flagged = 0;
+					(*flags_removed)++;
+				}
+
+				// Add this field to the queue.
+				tail->next = &(QueuedField) { row, col, NULL };
+				tail = tail->next;
 			}
-		} while(u.next);
+		}
+
+		Q = Q->next;
 	}
 }
 
