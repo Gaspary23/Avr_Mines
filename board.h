@@ -102,7 +102,7 @@ int move_mine(
 void increment_neighbours(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
-	uint8_t row_center, uint8_t col_center, uint8_t increment
+	uint8_t row_center, uint8_t col_center, int8_t increment
 );
 
 /**
