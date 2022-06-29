@@ -144,6 +144,10 @@ void reveal_section(
 					(*flags_removed)++;
 				}
 
+				if (field->num_mines) {
+					continue;
+				}
+
 				// Add this field to the queue.
 				tail->next = &(QueuedField) { row, col, NULL };
 				tail = tail->next;
