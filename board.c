@@ -4,10 +4,6 @@
 #include "board.h"
 #include "usart.h"
 
-/*
- * Resets the board to its initial state.
- * Mines are then regenerated.
- */
 void reset_board(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
@@ -22,9 +18,6 @@ void reset_board(
 	generate_mines(board_width, board_height, board, mine_amount);
 }
 
-/**
- * Reveal the whole board.
- */
 void reveal_board(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width]
@@ -36,13 +29,6 @@ void reveal_board(
 	}
 }
 
-/*
- * Fill the board with mines, skipping the last field.
- *
- * If the first field the player reveals turns out to be a mine,
- * it will be moved there. This way, the game can never be lost
- * on the first button press.
- */
 void generate_mines(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
@@ -77,11 +63,6 @@ void generate_mines(
 	}
 }
 
-/*
- * Reveal a field and its neighbours, unless it has neigbouring mines.
- * In that case, reveal the origin field only.
- * It is assumed to be unrevealed and not a mine.
- */
 void reveal_section(
 	uint8_t *fields_revealed, uint8_t *flags_removed,
 	uint8_t row_orig, uint8_t col_orig,
@@ -130,9 +111,6 @@ void reveal_section(
 	}
 }
 
-/*
- * Move a mine from one field to another.
- */
 int move_mine(
 	uint8_t row_orig, uint8_t col_orig, uint8_t row_dest, uint8_t col_dest,
 	uint8_t board_width, uint8_t board_height,
@@ -160,11 +138,6 @@ int move_mine(
 	return 1;
 }
 
-/*
- * Assuming the field at i, j is a mine,
- * increments the neigbouring mines counter
- * for every neighbour field.
- */
 void increment_neighbours(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
@@ -185,10 +158,6 @@ void increment_neighbours(
 	}
 }
 
-/**
- * Move the cursor alongside the x or y axis,
- * wrapping from one screen border to the other if necessary.
- */
 int move_wrapping(uint8_t sel, int8_t amount, uint8_t limit) {
 	if (amount < 0 && sel < abs(amount)) {
 		return limit - 1;

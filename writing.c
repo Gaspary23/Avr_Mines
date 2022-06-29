@@ -7,9 +7,6 @@
 #include "chars.h"
 #include "nokia5110.h"
 
-/**
- * Write the board to the screen.
- */
 void write_board(
 	uint8_t board_width, uint8_t board_height,
 	Field board[board_height][board_width],
@@ -55,22 +52,16 @@ void write_board(
 	}
 }
 
-/**
- * Write the amount of flags used by the player to the screen.
- */
 void write_flag_count(
 	uint8_t x, uint8_t y,
-	uint8_t flags_placed, uint8_t max_flags
+	uint8_t flags_placed, uint8_t mine_amount
 ) {
 	char flags[7];
-	sprintf(flags, "%02d/%02d\004", flags_placed, max_flags);
+	sprintf(flags, "%02d/%02d\004", flags_placed, mine_amount);
 	nokia_lcd_set_cursor(x, y);
 	nokia_lcd_write_string(flags, 1);
 }
 
-/**
- * Write the timer in MM:SS format to the screen.
- */
 void write_timer(
 	uint8_t x, uint8_t y, uint8_t min, uint8_t sec
 ) {
@@ -80,27 +71,18 @@ void write_timer(
 	nokia_lcd_write_string(time_display, 1);
 }
 
-/**
- * Write the victory message to the screen.
- */
 void write_victory(uint8_t x, uint8_t y)
 {
 	nokia_lcd_set_cursor(x, y);
 	nokia_lcd_write_string("B) Press FLAG ", 1);
 }
 
-/**
- * Write the defeat message to the screen.
- */
 void write_defeat(uint8_t x, uint8_t y)
 {
 	nokia_lcd_set_cursor(x, y);
 	nokia_lcd_write_string("xO Press FLAG ", 1);
 }
 
-/**
- * Write the start menu to the screen.
- */
 void write_menu()
 {
 	nokia_lcd_write_string(
