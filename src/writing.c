@@ -39,7 +39,7 @@ void write_board(
 				nokia_lcd_write_string("\005", 1);
 			} else {
 				if (field.num_mines > 0) {
-					char value[3];
+					char value[4];
 					sprintf(value, "%d", field.num_mines);
 					nokia_lcd_write_string(value, 1);
 				} else {

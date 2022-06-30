@@ -243,11 +243,12 @@ void setup()
 	sei();
 
 	nokia_lcd_init();
-	nokia_lcd_custom(1, CLOCK_GLYPH);
-	nokia_lcd_custom(2, UNREVEALED_GLYPH);
-	nokia_lcd_custom(3, SELECTED_GLYPH);
-	nokia_lcd_custom(4, FLAG_GLYPH);
-	nokia_lcd_custom(5, MINE_GLYPH);
+	// Cast the glyphs to uint8_t* to suppress warnings.
+	nokia_lcd_custom(1, (uint8_t*) CLOCK_GLYPH);
+	nokia_lcd_custom(2, (uint8_t*) UNREVEALED_GLYPH);
+	nokia_lcd_custom(3, (uint8_t*) SELECTED_GLYPH);
+	nokia_lcd_custom(4, (uint8_t*) FLAG_GLYPH);
+	nokia_lcd_custom(5, (uint8_t*) MINE_GLYPH);
 
 	// Initialize USART for debugging purposes.
 	USART_Init();
