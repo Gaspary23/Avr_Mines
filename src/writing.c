@@ -35,11 +35,9 @@ void write_board(
 				else {
 					nokia_lcd_write_string("\002", 1);
 				}
-			}
-			else if (field.mine) {
+			} else if (field.mine) {
 				nokia_lcd_write_string("\005", 1);
-			}
-			else {
+			} else {
 				if (field.num_mines > 0) {
 					char value[3];
 					sprintf(value, "%d", field.num_mines);

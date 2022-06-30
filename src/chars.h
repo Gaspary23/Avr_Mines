@@ -1,3 +1,7 @@
+/**
+ * Custom glyphs for the AVR Nokia game.
+ */
+
 #ifndef MINES_CHARS
 #define MINES_CHARS
 

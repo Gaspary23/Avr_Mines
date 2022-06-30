@@ -1,7 +1,10 @@
-/*
- * Authors: Bernardo Barzotto Zomer (21103639)
- *          Lucas Marchesan Cunha   (21101060)
- *          Pedro da Cunha Gaspary  (21101429)
+/**
+ * AVR Mines: Minesweeper for AVR
+ *
+ * Source code: https://github.com/Gaspary23/Avr_Mines
+ * Authors: Bernardo Barzotto Zomer
+ *          Lucas Marchesan Cunha
+ *          Pedro da Cunha Gaspary
  */
 
 #include <avr/io.h>
@@ -150,6 +153,8 @@ void handle_buttons(Field *sel_field)
 		if (g_game_state == START) {
 			g_game_state = PLAYING;
 
+			// If the first field revealed is a mine,
+			// move it to the last field, which is otherwise always empty.
 			if (sel_field->mine) {
 				move_mine(
 					g_sel_y, g_sel_x, BOARD_HEIGHT - 1, BOARD_WIDTH - 1,

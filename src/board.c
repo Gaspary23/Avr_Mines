@@ -152,7 +152,7 @@ void increment_neighbours(
 				row >= 0 && row < board_height &&
 				col >= 0 && col < board_width
 			) {
-				board[row][col].num_mines+=increment;
+				board[row][col].num_mines += increment;
 			}
 		}
 	}

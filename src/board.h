@@ -1,3 +1,8 @@
+/**
+ * Board manipulation utilities
+ * for the AVR Mines game.
+ */
+
 #ifndef MINES_BOARD
 #define MINES_BOARD
 
