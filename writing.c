@@ -74,13 +74,13 @@ void write_timer(
 void write_victory(uint8_t x, uint8_t y)
 {
 	nokia_lcd_set_cursor(x, y);
-	nokia_lcd_write_string("B) Press FLAG ", 1);
+	nokia_lcd_write_string("B)  Win  FLAG ", 1);
 }
 
 void write_defeat(uint8_t x, uint8_t y)
 {
 	nokia_lcd_set_cursor(x, y);
-	nokia_lcd_write_string("xO Press FLAG ", 1);
+	nokia_lcd_write_string("xO Defeat FLAG", 1);
 }
 
 void write_menu()
