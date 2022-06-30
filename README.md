@@ -52,4 +52,4 @@ O tabuleiro é revelado e uma mensagem de derrota aparece, como visto na **Figur
 
 ## Recursos:
 
-Para implementar esse jogo, foi usado o processador do AVR. Foram utilizados seis botões, sendo quatro direcionais e dois de seleção. Os direcionais alternam a casa a ser selecionada. O botão CHECK é responsável por iniciar o jogo saindo da tela inicial, e por selecionar as casas desejadas, revelando elas durante o jogo. O botão FLAG é responsável por reiniciar o jogo quando ele acabou, e marcar uma casa do tabuleiro com uma bandeira.
+Para implementar esse jogo, foi usado o processador atmega328 do AVR e o display utilizado foi o pcd544. O projeto foi simulado no simulIDE 0.4.15_SR9-1. Foram utilizados seis botões, sendo quatro direcionais e dois de seleção. Os direcionais alternam a casa a ser selecionada. O botão CHECK é responsável por iniciar o jogo saindo da tela inicial, e por selecionar as casas desejadas, revelando elas durante o jogo. O botão FLAG é responsável por reiniciar o jogo quando ele acabou, e marcar uma casa do tabuleiro com uma bandeira.
